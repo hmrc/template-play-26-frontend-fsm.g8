@@ -6,9 +6,9 @@ To create a new project based on the template:
 * Install g8 commandline tool (http://www.foundweekends.org/giter8/setup.html)
 * Go to the directory where you want to create the template
 * Decide your service name (the hardest part :))
-* Run the command
+* Run the command, changing `servicename` to your service name (with spaces)
 
-    `g8 {GITHUB_USER}/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM"`
+    `g8 hmrc/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM"`
     
 and then
     
