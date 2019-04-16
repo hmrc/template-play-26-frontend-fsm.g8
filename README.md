@@ -12,7 +12,7 @@ To create a new project based on the template:
     
 and then
     
-    cd new-shiny-service-26-fsm-frontend
+    cd new-shiny-service-26-fsm
     git init
 	git add .
 	git commit -m start
