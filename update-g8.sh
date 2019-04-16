@@ -13,7 +13,7 @@ if [ -f ./build.sbt ] && [ -d ./src/main/g8 ]; then
         cd make-it-g8
    fi
 
-   sbt "run --noclear -s ../../target/sandbox/new-shiny-service-26-fsm -t ../.. --description HMRC+Digital+Scala+Play+2.6+Stateful+Frontend -p uk.gov.hmrc.newshinyservice26fsmfrontend -K servicename=New+Shiny+Service+26+FSM" 
+   sbt "run --noclear -s ../../target/sandbox/new-shiny-service-26-fsm-frontend -t ../.. --description HMRC+Digital+Scala+Play+2.6+Stateful+Frontend -p uk.gov.hmrc.newshinyservice26fsmfrontend -K servicename=New+Shiny+Service+26+FSM serviceTargetPort=9999" 
 
 else
 

@@ -60,7 +60,7 @@ lazy val root = (project in file("."))
     name := "$servicenameHyphen$-frontend",
     organization := "uk.gov.hmrc",
     scalaVersion := "2.12.8",
-    PlayKeys.playDefaultPort := 9999,
+    PlayKeys.playDefaultPort := $serviceTargetPort$,
     resolvers := Seq(
       Resolver.bintrayRepo("hmrc", "releases"),
       Resolver.bintrayRepo("hmrc", "release-candidates"),

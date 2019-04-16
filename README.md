@@ -6,13 +6,13 @@ To create a new project based on the template:
 * Install g8 commandline tool (http://www.foundweekends.org/giter8/setup.html)
 * Go to the directory where you want to create the template
 * Decide your service name (the hardest part :))
-* Run the command, changing `servicename` to your service name (with spaces)
+* Run the command
 
-    `g8 hmrc/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM"`
+    `g8 {GITHUB_USER}/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999"`
     
 and then
     
-    cd new-shiny-service-26-fsm
+    cd new-shiny-service-26-fsm-frontend
     git init
 	git add .
 	git commit -m start
@@ -58,6 +58,7 @@ the template will supply the following values for placeholders:
 	$servicenamePackagedLowercase$ -> new/shiny/service/26/fsm
 	$servicenameHyphen$ -> new-shiny-service-26-fsm
 	$servicename$ -> New Shiny Service 26 FSM
+	$serviceTargetPort$ -> 9999
 
 and produce the folders and files as shown below:
 

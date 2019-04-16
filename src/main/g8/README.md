@@ -15,9 +15,9 @@
     sm --start AGENTS_STUBS -f
     sbt run
 
-It should then be listening on port 9999
+It should then be listening on port $serviceTargetPort$
 
-    browse http://localhost:9999/$servicenameHyphen$
+    browse http://localhost:$serviceTargetPort$/$servicenameHyphen$
 
 ### License
 
