@@ -27,7 +27,7 @@ How to test the template and generate an example project
 
 * Run `./test.sh` 
 
-An example project will be then created and tested in `target/sandbox/template-play-26-frontend-fsm.g8`
+An example project will be then created and tested in `target/sandbox/new-shiny-service-26-fsm`
 
 How to modify the template?
 ==
@@ -57,110 +57,111 @@ the template will supply the following values for placeholders:
 	$servicenamePackaged$ -> New/Shiny/Service/26/FSM
 	$servicenamePackagedLowercase$ -> new/shiny/service/26/fsm
 	$servicenameHyphen$ -> new-shiny-service-26-fsm
+	$servicenameLowercase$ -> new shiny service 26 fsm
+	$servicenameUppercase$ -> NEW SHINY SERVICE 26 FSM
 	$servicename$ -> New Shiny Service 26 FSM
 	$serviceTargetPort$ -> 9999
 
 and produce the folders and files as shown below:
 
-    ├─ .gitignore
-	├─ .scalafmt.conf
-	├─ app
-	│  ├─ ErrorHandler.scala
-	│  ├─ FrontendModule.scala
-	│  └─ uk
-	│     └─ gov
-	│        └─ hmrc
-	│           └─ newshinyservice26fsmfrontend
-	│              ├─ connectors
-	│              │  ├─ FrontendAuthConnector.scala
-	│              │  └─ NewShinyService26FsmConnector.scala
-	│              │     
-	│              ├─ controllers
-	│              │  ├─ AuthActions.scala
-	│              │  ├─ NewShinyService26FsmFrontendController.scala
-	│              │  └─ package.scala
-	│              │     
-	│              ├─ journeys
-	│              │  ├─ NewShinyService26FsmFrontendJourneyModel.scala
-	│              │  ├─ NewShinyService26FsmFrontendJourneyService.scala
-	│              │  └─ NewShinyService26FsmFrontendJourneyStateFormats.scala
-	│              │     
-	│              ├─ models
-	│              │  └─ NewShinyService26FsmFrontendModel.scala
-	│              │     
-	│              ├─ repository
-	│              │  ├─ MongoSessionStore.scala
-	│              │  ├─ SessionCache.scala
-	│              │  └─ SessionCacheRepository.scala
-	│              │     
-	│              ├─ services
-	│              │  └─ AuditService.scala
-	│              │     
-	│              ├─ views
-	│              │  ├─ end.scala.html
-	│              │  ├─ error_prefix.scala.html
-	│              │  ├─ error_template.scala.html
-	│              │  ├─ govuk_wrapper.scala.html
-	│              │  ├─ main_template.scala.html
-	│              │  └─ start_page.scala.html
-	│              │     
-	│              └─ wiring
-	│                 └─ AppConfig.scala
-	│                    
-	├─ build.sbt
-	├─ conf
-	│  ├─ app.routes
-	│  ├─ application-json-logger.xml
-	│  ├─ application.conf
-	│  ├─ logback.xml
-	│  ├─ messages
-	│  └─ prod.routes
-	│     
-	├─ it
-	│  └─ uk
-	│     └─ gov
-	│        └─ hmrc
-	│           └─ newshinyservice26fsmfrontend
-	│              ├─ connectors
-	│              │  ├─ NewShinyService26FsmConnectorISpec.scala
-	│              │  └─ TestAppConfig.scala
-	│              │     
-	│              ├─ controllers
-	│              │  ├─ AuthActionsISpec.scala
-	│              │  ├─ NewShinyService26FsmFrontendControllerISpec.scala
-	│              │  └─ TestNewShinyService26FsmJourneyService.scala
-	│              │     
-	│              ├─ stubs
-	│              │  ├─ AuthStubs.scala
-	│              │  └─ DataStreamStubs.scala
-	│              │     
-	│              └─ support
-	│                 ├─ BaseISpec.scala
-	│                 ├─ MetricsTestSupport.scala
-	│                 └─ WireMockSupport.scala
-	│                    
-	├─ project
-	│  ├─ build.properties
-	│  └─ plugins.sbt
-	│     
-	├─ README.md
-	└─ test
-	   └─ uk
-	      └─ gov
-	         └─ hmrc
-	            └─ newshinyservice26fsmfrontend
-	               ├─ controllers
-	               │  └─ NewShinyService26FrontendFormSpec.scala
-	               │     
-	               ├─ journey
-	               │  ├─ NewShinyService26FrontendFormatSpec.scala
-	               │  ├─ NewShinyService26FrontendModelSpec.scala
-	               │  ├─ StateMatchers.scala
-	               │  └─ TestStorage.scala
-	               │     
-	               ├─ services
-	               │  └─ AuditServiceSpec.scala
-	               │     
-	               └─ views
-	                  └─ ViewsSpec.scala
-	
+    ├── .gitignore
+	├── .scalafmt.conf
+	├── app
+	│   ├── ErrorHandler.scala
+	│   ├── FrontendModule.scala
+	│   └── uk
+	│       └── gov
+	│           └── hmrc
+	│               └── newshinyservice26fsmfrontend
+	│                   ├── connectors
+	│                   │   ├── FrontendAuthConnector.scala
+	│                   │   └── NewShinyService26FsmConnector.scala
+	│                   │
+	│                   ├── controllers
+	│                   │   ├── AuthActions.scala
+	│                   │   ├── NewShinyService26FsmFrontendController.scala
+	│                   │   └── package.scala
+	│                   │
+	│                   ├── journeys
+	│                   │   ├── NewShinyService26FsmFrontendJourneyModel.scala
+	│                   │   ├── NewShinyService26FsmFrontendJourneyService.scala
+	│                   │   └── NewShinyService26FsmFrontendJourneyStateFormats.scala
+	│                   │
+	│                   ├── models
+	│                   │   └── NewShinyService26FsmFrontendModel.scala
+	│                   │
+	│                   ├── repository
+	│                   │   ├── MongoSessionStore.scala
+	│                   │   ├── SessionCache.scala
+	│                   │   └── SessionCacheRepository.scala
+	│                   │
+	│                   ├── services
+	│                   │   └── AuditService.scala
+	│                   │
+	│                   ├── views
+	│                   │   ├── end.scala.html
+	│                   │   ├── error_prefix.scala.html
+	│                   │   ├── error_template.scala.html
+	│                   │   ├── govuk_wrapper.scala.html
+	│                   │   ├── main_template.scala.html
+	│                   │   └── start_page.scala.html
+	│                   │
+	│                   └── wiring
+	│                       └── AppConfig.scala
+	│
+	├── build.sbt
+	├── conf
+	│   ├── app.routes
+	│   ├── application-json-logger.xml
+	│   ├── application.conf
+	│   ├── logback.xml
+	│   ├── messages
+	│   └── prod.routes
+	│
+	├── it
+	│   └── uk
+	│       └── gov
+	│           └── hmrc
+	│               └── newshinyservice26fsmfrontend
+	│                   ├── connectors
+	│                   │   ├── NewShinyService26FsmConnectorISpec.scala
+	│                   │   └── TestAppConfig.scala
+	│                   │
+	│                   ├── controllers
+	│                   │   ├── AuthActionsISpec.scala
+	│                   │   ├── NewShinyService26FsmFrontendControllerISpec.scala
+	│                   │   └── TestNewShinyService26FsmJourneyService.scala
+	│                   │
+	│                   ├── stubs
+	│                   │   ├── AuthStubs.scala
+	│                   │   └── DataStreamStubs.scala
+	│                   │
+	│                   └── support
+	│                       ├── BaseISpec.scala
+	│                       ├── MetricsTestSupport.scala
+	│                       └── WireMockSupport.scala
+	│
+	├── project
+	│   ├── build.properties
+	│   └── plugins.sbt
+	│
+	├── README.md
+	└── test
+	    └── uk
+	        └── gov
+	            └── hmrc
+	                └── newshinyservice26fsmfrontend
+	                    ├── controllers
+	                    │   └── NewShinyService26FrontendFormSpec.scala
+	                    │
+	                    ├── journey
+	                    │   ├── NewShinyService26FrontendFormatSpec.scala
+	                    │   ├── NewShinyService26FrontendModelSpec.scala
+	                    │   ├── StateMatchers.scala
+	                    │   └── TestStorage.scala
+	                    │
+	                    ├── services
+	                    │   └── AuditServiceSpec.scala
+	                    │
+	                    └── views
+	                        └── ViewsSpec.scala

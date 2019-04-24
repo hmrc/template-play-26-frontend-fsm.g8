@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-if [ -f ./build.sbt ] && [ -d ./src/main/g8 ]; then
+if [[ -f ./build.sbt ]] && [[ -d ./src/main/g8 ]]; then
 
    mkdir -p target
    cd target
-   if [ -d ./make-it-g8 ] && [ -d ./make-it-g8/.git ] ; then
-        cd make-it-g8
+   if [[ -d .makeitg8 ]] && [[ -d .makeitg8/.git ]] ; then
+        cd .makeitg8
         git pull origin master
    else
-        rm -r make-it-g8
-        git clone https://github.com/arturopala/make-it-g8.git
-        cd make-it-g8
+        rm -r .makeitg8
+        git clone https://github.com/arturopala/make-it-g8.git .makeitg8
+        cd .makeitg8
    fi
 
-   sbt "run --noclear -s ../../target/sandbox/new-shiny-service-26-fsm -t ../.. --description HMRC+Digital+Scala+Play+2.6+Stateful+Frontend -p uk.gov.hmrc.newshinyservice26fsmfrontend -K servicename=New+Shiny+Service+26+FSM serviceTargetPort=9999" 
+   sbt "run --noclear --source ../../target/sandbox/new-shiny-service-26-fsm --target ../.. --name template-play-26-frontend-fsm.g8 --package uk.gov.hmrc.newshinyservice26fsmfrontend --description HMRC+Digital+Scala+Play+2.6+Stateful+Frontend -K servicename=New+Shiny+Service+26+FSM serviceTargetPort=9999" 
 
 else
 
