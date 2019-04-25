@@ -30,8 +30,9 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
       val hc = HeaderCarrier(
         authorization = Some(Authorization("dummy bearer token")),
-        sessionId = Some(SessionId("dummy session id")),
-        requestId = Some(RequestId("dummy request id")))
+        sessionId = Some(SessionId("dummy session journeyId")),
+        requestId = Some(RequestId("dummy request journeyId"))
+      )
 
       val model = $servicenameCamel$FrontendModel(
         name = "John Smith",
@@ -59,8 +60,8 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
         sentEvent.tags("transactionName") shouldBe "new-shiny-service-26-frontend-something-happened"
         sentEvent.tags("path") shouldBe "/path"
-        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
-        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+        sentEvent.tags("X-Session-ID") shouldBe "dummy session journeyId"
+        sentEvent.tags("X-Request-ID") shouldBe "dummy request journeyId"
       }
     }
   }

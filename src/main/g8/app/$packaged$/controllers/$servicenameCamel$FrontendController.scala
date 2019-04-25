@@ -6,13 +6,15 @@ import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.http.HeaderCarrier
 import $package$.connectors.{FrontendAuthConnector, $servicenameCamel$Connector}
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Start}
 import $package$.journeys.$servicenameCamel$FrontendJourneyService
 import $package$.models.$servicenameCamel$FrontendModel
 import $package$.views.html.{main_template, _}
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.play.fsm.JourneyController
+import uk.gov.hmrc.play.fsm.{JourneyController, JourneyIdSupport}
 import uk.gov.hmrc.play.views.html.helpers.{ErrorSummary, FormWithCSRF, Input}
 
 import scala.concurrent.ExecutionContext
@@ -29,10 +31,16 @@ class $servicenameCamel$FrontendController @Inject()(
   mainTemplate: main_template,
   override val journeyService: $servicenameCamel$FrontendJourneyService,
   controllerComponents: MessagesControllerComponents)(implicit val configuration: Configuration, ec: ExecutionContext)
-    extends FrontendController(controllerComponents) with I18nSupport with AuthActions with JourneyController {
+    extends FrontendController(controllerComponents) with I18nSupport with AuthActions with JourneyController
+    with JourneyIdSupport {
 
   import $servicenameCamel$FrontendController._
   import $package$.journeys.$servicenameCamel$FrontendJourneyModel._
+
+  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier = {
+    val hc = HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
+    appendJourneyId(hc)
+  }
 
   val AsHuman: WithAuthorised[String] = { implicit request =>
     withAuthorisedAsHuman(_)

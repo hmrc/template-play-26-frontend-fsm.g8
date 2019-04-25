@@ -22,12 +22,22 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
 
   import journeyState.model.State._
 
+  def fakeRequest = FakeRequest().withSession(controller.journeyService.journeyKey -> "fooId")
+
   "NewShinyService26FrontendController" when {
 
     "GET /start" should {
-      "display start page" in {
+
+      "redirect to start page with journeyId" in {
         journeyState.set(Start, Nil)
         val result = controller.showStart(FakeRequest())
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some("/$servicenameHyphen$")
+      }
+
+      "display start page" in {
+        journeyState.set(Start, Nil)
+        val result = controller.showStart(fakeRequest)
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("start.title"))
       }
@@ -37,7 +47,7 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
       "redirect to end page" in {
         journeyState.set(Start, Nil)
         val result = controller.submitStart(
-          FakeRequest().withFormUrlEncodedBody(
+          fakeRequest.withFormUrlEncodedBody(
             "name"            -> "Henry",
             "postcode"        -> "",
             "telephoneNumber" -> "00000000001",
@@ -50,7 +60,7 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
     "GET /end" should {
       "display start page" in {
         journeyState.set(End("name", Some("postcode"), Some("telephone"), Some("email")), Nil)
-        val result = controller.showEnd(FakeRequest())
+        val result = controller.showEnd(fakeRequest)
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("end.title"))
       }

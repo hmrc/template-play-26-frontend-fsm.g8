@@ -19,9 +19,9 @@ trait AppConfig {
 class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
   val appName = config.getString("appName")
 
-  val someInt = config.getInt("new-shiny-service-26.someInt")
-  val someString = config.getString("new-shiny-service-26.someString")
-  val someBoolean = config.getBoolean("new-shiny-service-26.someBoolean")
+  val someInt = config.getInt("someInt")
+  val someString = config.getString("someString")
+  val someBoolean = config.getBoolean("someBoolean")
   val authBaseUrl = config.baseUrl("auth")
   val serviceBaseUrl = config.baseUrl("new-shiny-service-26")
   val mongoSessionExpiryTime: Int = config.getInt("mongodb.session.expireAfterSeconds")

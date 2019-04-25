@@ -17,7 +17,7 @@
                 <dt class="cya-question">
                     @Messages("end.header.parameters")
                 </dt>
-                <dd class="cya-answer" id="name">
+                <dd class="cya-answer" journeyId="name">
                     @$servicenamecamel$FrontendForm("name").value
                 </dd>
                 <dd class="cya-change">
@@ -31,7 +31,7 @@
                 <dt class="cya-question">
                     @Messages("end.header.contactDetails")
                 </dt>
-                <dd class="cya-answer" id="contactDetails">
+                <dd class="cya-answer" journeyId="contactDetails">
                     @if($servicenamecamel$FrontendForm("emailAddress").value){<span class="display-block">}@$servicenamecamel$FrontendForm("emailAddress").value @if($servicenamecamel$FrontendForm("emailAddress").value){</span>}
                     @if($servicenamecamel$FrontendForm("telephoneNumber").value){<span class="display-block">}@$servicenamecamel$FrontendForm("telephoneNumber").value @if($servicenamecamel$FrontendForm("telephoneNumber").value){</span>}
                 </dd>
