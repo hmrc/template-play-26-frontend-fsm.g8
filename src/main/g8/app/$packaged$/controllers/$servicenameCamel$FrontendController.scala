@@ -44,21 +44,20 @@ class $servicenameCamel$FrontendController @Inject()(
     withAuthorisedAsHuman(_)
   }
 
-  val showStart = showCurrentStateWhenAuthorised(AsHuman) {
+  val showStart = actionShowStateWhenAuthorised(AsHuman) {
     case Start =>
   }
 
   val submitStart = action { implicit request =>
-    authorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.submitStart)
+    whenAuthorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.submitStart)
   }
 
   val showEnd = action { implicit request =>
-    whenAuthorised(AsHuman) {
+    showStateWhenAuthorised(AsHuman) {
       case _: End =>
-    }(display)
-      .andThen {
-        case Success(_) => journeyService.cleanBreadcrumbs()
-      }
+    }.andThen {
+      case Success(_) => journeyService.cleanBreadcrumbs()
+    }
   }
 
   override def getCallFor(state: State)(implicit request: Request[_]): Call = state match {
