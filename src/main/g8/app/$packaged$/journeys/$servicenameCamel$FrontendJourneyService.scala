@@ -16,6 +16,10 @@ trait $servicenameCamel$FrontendJourneyService extends PersistentJourneyService 
   val journeyKey = "$servicenameCamel$Journey"
 
   override val model = $servicenameCamel$FrontendJourneyModel
+
+  // do not keep errors in the journey history
+  override val breadcrumbsRetentionStrategy: Breadcrumbs => Breadcrumbs =
+    _.filterNot(_.isInstanceOf[model.IsError])
 }
 
 @Singleton
@@ -32,6 +36,7 @@ class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(_cacheRepo
     override val sessionName: String = journeyKey
     override val cacheRepository: CacheRepository = _cacheRepository
 
+    // uses journeyId as a sessionId to persist state and breadcrumbs
     override def getSessionId(implicit hc: HeaderCarrier): Option[String] =
       hc.extraHeaders.find(_._1 == journeyKey).map(_._2)
   }

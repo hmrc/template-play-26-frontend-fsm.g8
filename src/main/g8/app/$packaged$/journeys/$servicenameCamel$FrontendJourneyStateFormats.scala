@@ -1,7 +1,7 @@
 package $package$.journeys
 import play.api.libs.json._
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Start}
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State._
 import uk.gov.hmrc.play.fsm.JsonStateFormats
 
 object $servicenameCamel$FrontendJourneyStateFormats extends JsonStateFormats[State] {
@@ -14,8 +14,9 @@ object $servicenameCamel$FrontendJourneyStateFormats extends JsonStateFormats[St
 
   override def deserializeState(stateName: String, properties: JsValue): JsResult[State] =
     stateName match {
-      case "Start" => JsSuccess(Start)
-      case "End"   => EndFormat.reads(properties)
-      case _       => JsError(s"Unknown state name \$stateName")
+      case "Start"     => JsSuccess(Start)
+      case "End"       => EndFormat.reads(properties)
+      case "SomeError" => JsSuccess(SomeError)
+      case _           => JsError(s"Unknown state name \$stateName")
     }
 }

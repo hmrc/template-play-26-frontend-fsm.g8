@@ -57,7 +57,7 @@ class $servicenameCamel$FrontendController @Inject()(
       case _: End =>
     }(display)
       .andThen {
-        case Success(_) => journeyService.clear
+        case Success(_) => journeyService.cleanBreadcrumbs()
       }
   }
 
