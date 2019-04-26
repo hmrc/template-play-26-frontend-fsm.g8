@@ -12,12 +12,12 @@ import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Sta
 import $package$.journeys.$servicenameCamel$FrontendJourneyService
 import $package$.models.$servicenameCamel$FrontendModel
 import $package$.views.html.{main_template, _}
-import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.play.fsm.{JourneyController, JourneyIdSupport}
 import uk.gov.hmrc.play.views.html.helpers.{ErrorSummary, FormWithCSRF, Input}
 
 import scala.concurrent.ExecutionContext
+import scala.util.Success
 
 @Singleton
 class $servicenameCamel$FrontendController @Inject()(
@@ -37,16 +37,12 @@ class $servicenameCamel$FrontendController @Inject()(
   import $servicenameCamel$FrontendController._
   import $package$.journeys.$servicenameCamel$FrontendJourneyModel._
 
-  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier = {
-    val hc = HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
-    appendJourneyId(hc)
-  }
+  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
+    appendJourneyId(super.hc)
 
   val AsHuman: WithAuthorised[String] = { implicit request =>
     withAuthorisedAsHuman(_)
   }
-
-  override val root: Call = routes.$servicenameCamel$FrontendController.showStart()
 
   val showStart = showCurrentStateWhenAuthorised(AsHuman) {
     case Start =>
@@ -56,8 +52,13 @@ class $servicenameCamel$FrontendController @Inject()(
     authorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.submitStart)
   }
 
-  val showEnd = showCurrentStateWhenAuthorised(AsHuman) {
-    case _: End =>
+  val showEnd = action { implicit request =>
+    whenAuthorised(AsHuman) {
+      case _: End =>
+    }(display)
+      .andThen {
+        case Success(_) => journeyService.clear
+      }
   }
 
   override def getCallFor(state: State)(implicit request: Request[_]): Call = state match {
