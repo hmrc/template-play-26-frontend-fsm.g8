@@ -31,14 +31,11 @@ class $servicenameCamel$FrontendController @Inject()(
   mainTemplate: main_template,
   override val journeyService: $servicenameCamel$FrontendJourneyService,
   controllerComponents: MessagesControllerComponents)(implicit val configuration: Configuration, ec: ExecutionContext)
-    extends FrontendController(controllerComponents) with I18nSupport with AuthActions with JourneyController
-    with JourneyIdSupport {
+    extends FrontendController(controllerComponents) with I18nSupport with AuthActions
+    with JourneyController[HeaderCarrier] with JourneyIdSupport[HeaderCarrier] {
 
   import $servicenameCamel$FrontendController._
   import $package$.journeys.$servicenameCamel$FrontendJourneyModel._
-
-  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
-    appendJourneyId(super.hc)
 
   val AsHuman: WithAuthorised[String] = { implicit request =>
     withAuthorisedAsHuman(_)
@@ -70,6 +67,12 @@ class $servicenameCamel$FrontendController @Inject()(
     case Start  => Ok(new start_page(mainTemplate, input, form, errorSummary)($servicenameCamel$FrontendForm))
     case _: End => Ok(new end(mainTemplate)($servicenameCamel$FrontendForm))
   }
+
+  override implicit def context(implicit rh: RequestHeader): HeaderCarrier =
+    appendJourneyId(super.hc)
+
+  override def amendContext(headerCarrier: HeaderCarrier)(key: String, value: String): HeaderCarrier =
+    headerCarrier.withExtraHeaders(key -> value)
 }
 
 object $servicenameCamel$FrontendController {

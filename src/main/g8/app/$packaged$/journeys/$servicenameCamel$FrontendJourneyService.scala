@@ -11,7 +11,7 @@ import uk.gov.hmrc.play.fsm.PersistentJourneyService
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[MongoDBCached$servicenameCamel$FrontendJourneyService])
-trait $servicenameCamel$FrontendJourneyService extends PersistentJourneyService {
+trait $servicenameCamel$FrontendJourneyService extends PersistentJourneyService[HeaderCarrier] {
 
   val journeyKey = "$servicenameCamel$Journey"
 
