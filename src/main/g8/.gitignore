@@ -2,6 +2,7 @@
 
 !.gitignore
 !.scalafmt.conf
+!.description
 
 .cache
 /.classpath

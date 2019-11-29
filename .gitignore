@@ -1,5 +1,6 @@
 !.gitignore
 !.scalafmt.conf
+!.description
 *.iml
 *.class
 *.log
