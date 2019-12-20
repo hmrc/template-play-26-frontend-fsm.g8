@@ -9,7 +9,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NewShinyService26FrontendModelSpec extends UnitSpec with StateMatchers[State] {
+class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[State] {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -21,7 +21,7 @@ class NewShinyService26FrontendModelSpec extends UnitSpec with StateMatchers[Sta
       await(super.apply(transition))
   }
 
-  "NewShinyService26FrontendModel" when {
+  "$servicenameCamel$FrontendModel" when {
     "at state Start" should {
       "transition to End when Start submitted a form" in {
         given(Start) when submitStart("001.H")($servicenameCamel$FrontendModel("Henry", None, None, None)) should thenGo(

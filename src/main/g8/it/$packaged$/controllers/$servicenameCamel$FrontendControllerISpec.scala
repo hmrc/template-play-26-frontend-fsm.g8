@@ -24,7 +24,7 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
 
   def fakeRequest = FakeRequest().withSession(controller.journeyService.journeyKey -> "fooId")
 
-  "NewShinyService26FrontendController" when {
+  "$servicenameCamel$FrontendController" when {
 
     "GET /start" should {
 

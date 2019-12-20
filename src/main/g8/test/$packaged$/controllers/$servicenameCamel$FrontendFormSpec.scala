@@ -3,11 +3,11 @@ package $package$.controllers
 import $package$.models.$servicenameCamel$FrontendModel
 import uk.gov.hmrc.play.test.UnitSpec
 
-class NewShinyService26FrontendFormSpec extends UnitSpec {
+class $servicenameCamel$FrontendFormSpec extends UnitSpec {
 
-  "NewShinyService26FrontendForm" should {
+  "$servicenameCamel$FrontendForm" should {
 
-    "bind some input fields and return NewShinyService26FrontendModel and fill it back" in {
+    "bind some input fields and return $servicenameCamel$FrontendModel and fill it back" in {
       val form = $servicenameCamel$FrontendController.$servicenameCamel$FrontendForm
 
       val value = $servicenameCamel$FrontendModel(
@@ -22,7 +22,7 @@ class NewShinyService26FrontendFormSpec extends UnitSpec {
       form.fill(value).data shouldBe fieldValues
     }
 
-    "bind all input fields and return NewShinyService26FrontendModel and fill it back" in {
+    "bind all input fields and return $servicenameCamel$FrontendModel and fill it back" in {
       val form = $servicenameCamel$FrontendController.$servicenameCamel$FrontendForm
 
       val value = $servicenameCamel$FrontendModel(
