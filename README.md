@@ -20,7 +20,7 @@ How to create a new project based on the template?
 * Decide your service name (the hardest part :))
 * Run the command
 
-    `g8 {GITHUB_USER}/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999"`
+    `g8 hmrc/template-play-26-frontend-fsm.g8 --package="gov.uk.hmrc.newshinyservice"" --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999" --out new-shiny-service-frontend`
     
 and then
     

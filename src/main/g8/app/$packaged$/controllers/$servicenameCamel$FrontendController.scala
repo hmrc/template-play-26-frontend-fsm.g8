@@ -22,7 +22,7 @@ import scala.util.Success
 @Singleton
 class $servicenameCamel$FrontendController @Inject()(
   override val messagesApi: MessagesApi,
-  newShinyService26Connector: $servicenameCamel$Connector,
+  $servicenameCamel$Connector: $servicenameCamel$Connector,
   val authConnector: FrontendAuthConnector,
   val env: Environment,
   input: Input,

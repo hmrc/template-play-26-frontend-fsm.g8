@@ -5,7 +5,7 @@ import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Sta
 import $package$.journeys.$servicenameCamel$FrontendJourneyStateFormats
 import uk.gov.hmrc.play.test.UnitSpec
 
-class NewShinyService26FrontendFormatSpec extends UnitSpec {
+class $servicenameCamel$FrontendFormatSpec extends UnitSpec {
 
   implicit val formats: Format[State] = $servicenameCamel$FrontendJourneyStateFormats.formats
 

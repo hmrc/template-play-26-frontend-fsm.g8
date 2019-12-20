@@ -13,21 +13,21 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-object NewShinyService26FrontendEvent extends Enumeration {
-  val NewShinyService26FrontendSomethingHappened = Value
-  type NewShinyService26FrontendEvent = Value
+object $servicenameCamel$FrontendEvent extends Enumeration {
+  val $servicenameCamel$FrontendSomethingHappened = Value
+  type $servicenameCamel$FrontendEvent = Value
 }
 
 @Singleton
 class AuditService @Inject()(val auditConnector: AuditConnector) {
 
-  import NewShinyService26FrontendEvent._
+  import $servicenameCamel$FrontendEvent._
 
-  def sendNewShinyService26FrontendSomethingHappened(
+  def send$servicenameCamel$FrontendSomethingHappened(
     model: $servicenameCamel$FrontendModel,
     agentReference: Arn)(implicit hc: HeaderCarrier, request: Request[Any], ec: ExecutionContext): Unit =
     auditEvent(
-      NewShinyService26FrontendEvent.NewShinyService26FrontendSomethingHappened,
+      $servicenameCamel$FrontendEvent.$servicenameCamel$FrontendSomethingHappened,
       "new-shiny-service-26-frontend-something-happened",
       Seq(
         "agentReference"  -> agentReference.value,
@@ -38,7 +38,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
     )
 
   private[services] def auditEvent(
-    event: NewShinyService26FrontendEvent,
+    event: $servicenameCamel$FrontendEvent,
     transactionName: String,
     details: Seq[(String, Any)] = Seq.empty)(
     implicit hc: HeaderCarrier,
@@ -47,7 +47,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
     send(createEvent(event, transactionName, details: _*))
 
   private[services] def createEvent(
-    event: NewShinyService26FrontendEvent,
+    event: $servicenameCamel$FrontendEvent,
     transactionName: String,
     details: (String, Any)*)(implicit hc: HeaderCarrier, request: Request[Any], ec: ExecutionContext): DataEvent = {
 

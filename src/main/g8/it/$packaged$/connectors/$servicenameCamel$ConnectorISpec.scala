@@ -21,7 +21,7 @@ class $servicenameCamel$ConnectorISpec extends BaseISpec {
     Some("0123456789"),
     Some("email@test.com"))
 
-  "NewShinyService26Connector" when {
+  "$servicenameCamel$Connector" when {
 
     "getSmth" should {
 

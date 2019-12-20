@@ -24,7 +24,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
   "auditService" should {
 
-    "send an NewShinyService26FrontendSomethingHappened event with the correct fields" in {
+    "send an $servicenameCamel$FrontendSomethingHappened event with the correct fields" in {
       val mockConnector = mock[AuditConnector]
       val service = new AuditService(mockConnector)
 
@@ -41,7 +41,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         emailAddress = Some("john.smith@email.com"))
 
       await(
-        service.sendNewShinyService26FrontendSomethingHappened(model, Arn("ARN0001"))(
+        service.send$servicenameCamel$FrontendSomethingHappened(model, Arn("ARN0001"))(
           hc,
           FakeRequest("GET", "/path"),
           ExecutionContext.Implicits.global))
@@ -51,7 +51,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
-        sentEvent.auditType shouldBe "NewShinyService26FrontendSomethingHappened"
+        sentEvent.auditType shouldBe "$servicenameCamel$FrontendSomethingHappened"
         sentEvent.auditSource shouldBe "new-shiny-service-26-frontend"
         sentEvent.detail("agentReference") shouldBe "ARN0001"
         sentEvent.detail("name") shouldBe "John Smith"
