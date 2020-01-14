@@ -1,5 +1,4 @@
 A [Giter8](http://www.foundweekends.org/giter8/) template for creating HMRC Digital Scala Play 2.6 Stateful Frontend
-
 What's inside?
 ==
 
@@ -20,7 +19,7 @@ How to create a new project based on the template?
 * Decide your service name (the hardest part :))
 * Run the command
 
-    `g8 hmrc/template-play-26-frontend-fsm.g8 --package="gov.uk.hmrc.newshinyservice"" --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999" --out new-shiny-service-frontend`
+    `g8 hmrc/template-play-26-frontend-fsm.g8 --package=uk.gov.hmrc.newshinyservice26fsmfrontend --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999"`
     
 and then
     
@@ -159,22 +158,24 @@ and produce the folders and files as shown below:
 	│                       ├── MetricsTestSupport.scala
 	│                       └── WireMockSupport.scala
 	│
+	├── LICENSE
 	├── project
 	│   ├── build.properties
 	│   └── plugins.sbt
 	│
 	├── README.md
+	├── repository.yaml
 	└── test
 	    └── uk
 	        └── gov
 	            └── hmrc
 	                └── newshinyservice26fsmfrontend
 	                    ├── controllers
-	                    │   └── NewShinyService26FrontendFormSpec.scala
+	                    │   └── NewShinyService26FsmFrontendFormSpec.scala
 	                    │
 	                    ├── journey
-	                    │   ├── NewShinyService26FrontendFormatSpec.scala
-	                    │   ├── NewShinyService26FrontendModelSpec.scala
+	                    │   ├── NewShinyService26FsmFrontendFormatSpec.scala
+	                    │   ├── NewShinyService26FsmFrontendModelSpec.scala
 	                    │   ├── StateMatchers.scala
 	                    │   └── TestStorage.scala
 	                    │

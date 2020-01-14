@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ trait TestStorage[S] {
   @volatile
   private var state: Option[S] = None
 
-  def fetch(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[S]] = Future.successful(state)
+  def fetch(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[S]] =
+    Future.successful(state)
   def save(newState: S)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[S] = Future {
     state = Some(newState); newState
   }
