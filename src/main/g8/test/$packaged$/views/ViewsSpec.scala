@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package $package$.views
 
 import javax.inject.Inject
@@ -23,12 +39,13 @@ class ViewsSpec @Inject()(govUkWrapper: govuk_wrapper, mainTemplate: main_templa
 
   implicit val lang: Lang = Lang("eng")
 
-  private val filledForm = $servicenameCamel$FrontendController.$servicenameCamel$FrontendForm.fill(
-    $servicenameCamel$FrontendModel(
-      name = "My contact name",
-      postcode = Some("AA1 1AA"),
-      telephoneNumber = Some("9876543210"),
-      emailAddress = Some("my@email.com")))
+  private val filledForm =
+    $servicenameCamel$FrontendController.$servicenameCamel$FrontendForm.fill(
+      $servicenameCamel$FrontendModel(
+        name = "My contact name",
+        postcode = Some("AA1 1AA"),
+        telephoneNumber = Some("9876543210"),
+        emailAddress = Some("my@email.com")))
 
   "error_template view" should {
     "render title, heading and message" in new App {
@@ -75,7 +92,10 @@ class ViewsSpec @Inject()(govUkWrapper: govuk_wrapper, mainTemplate: main_templa
       content should include(Messages("start.helpdesklink.text2"))
 
       val html2 = new start_page(mainTemplate, input, form, errorSummary)
-        .f($servicenameCamel$FrontendForm)(FakeRequest(), MessagesImpl(lang, stubMessagesApi()), app.configuration)
+        .f($servicenameCamel$FrontendForm)(
+          FakeRequest(),
+          MessagesImpl(lang, stubMessagesApi()),
+          app.configuration)
       contentAsString(html2) shouldBe (content)
     }
   }
@@ -114,7 +134,10 @@ class ViewsSpec @Inject()(govUkWrapper: govuk_wrapper, mainTemplate: main_templa
         Some("my-custom-body-class"),
         Some("my-custom-main-class"),
         Some(Html("My custom script"))
-      )(Html("My custom main content HTML"))(MessagesImpl(lang, stubMessagesApi()), FakeRequest(), app.configuration)
+      )(Html("My custom main content HTML"))(
+        MessagesImpl(lang, stubMessagesApi()),
+        FakeRequest(),
+        app.configuration)
       contentAsString(html2) shouldBe (content)
     }
   }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package $package$.journeys
 
 import com.google.inject.ImplementedBy
@@ -23,12 +39,14 @@ trait $servicenameCamel$FrontendJourneyService extends PersistentJourneyService[
 }
 
 @Singleton
-class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(_cacheRepository: SessionCacheRepository)
+class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(
+  _cacheRepository: SessionCacheRepository)
     extends $servicenameCamel$FrontendJourneyService {
 
   case class PersistentState(state: model.State, breadcrumbs: List[model.State])
 
-  implicit val formats1: Format[model.State] = $servicenameCamel$FrontendJourneyStateFormats.formats
+  implicit val formats1: Format[model.State] =
+    $servicenameCamel$FrontendJourneyStateFormats.formats
   implicit val formats2: Format[PersistentState] = Json.format[PersistentState]
 
   final val cache = new SessionCache[PersistentState] {
@@ -41,11 +59,14 @@ class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(_cacheRepo
       hc.extraHeaders.find(_._1 == journeyKey).map(_._2)
   }
 
-  override protected def fetch(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[StateAndBreadcrumbs]] =
+  override protected def fetch(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Option[StateAndBreadcrumbs]] =
     cache.fetch.map(_.map(ps => (ps.state, ps.breadcrumbs)))
 
-  override protected def save(
-    state: StateAndBreadcrumbs)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StateAndBreadcrumbs] =
+  override protected def save(state: StateAndBreadcrumbs)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[StateAndBreadcrumbs] =
     cache.save(PersistentState(state._1, state._2)).map(_ => state)
 
   override def clear(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =

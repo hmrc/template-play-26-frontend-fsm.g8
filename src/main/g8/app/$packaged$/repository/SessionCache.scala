@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ trait SessionCache[T] extends MongoSessionStore[T] {
         Future.failed(new RuntimeException(error))
     }
 
-  def fetchAndClear(implicit hc: HeaderCarrier, reads: Reads[T], ec: ExecutionContext): Future[Option[T]] = {
+  def fetchAndClear(
+    implicit hc: HeaderCarrier,
+    reads: Reads[T],
+    ec: ExecutionContext): Future[Option[T]] = {
     val result = for {
       cache <- get
       _     <- delete()
@@ -46,7 +49,8 @@ trait SessionCache[T] extends MongoSessionStore[T] {
     }
   }
 
-  def save(input: T)(implicit hc: HeaderCarrier, writes: Writes[T], ec: ExecutionContext): Future[T] =
+  def save(
+    input: T)(implicit hc: HeaderCarrier, writes: Writes[T], ec: ExecutionContext): Future[T] =
     store(input).flatMap {
       case Right(_) => input
       case Left(error) =>
