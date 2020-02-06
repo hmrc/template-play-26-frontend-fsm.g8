@@ -45,10 +45,10 @@ trait MongoSessionStore[T] {
           .flatMap(_.flatMap(_.data))
           .flatMap {
             case Some(cache) =>
-              (cache \\ sessionName).asOpt[JsObject] match {
+              (cache \\ sessionName).asOpt[JsValue] match {
                 case None => Right(None)
-                case Some(obj) =>
-                  obj.validate[T] match {
+                case Some(value: JsValue) =>
+                  value.validate[T] match {
                     case JsSuccess(p, _) => Right(Some(p))
                     case JsError(errors) =>
                       val allErrors = errors.map(_._2.map(_.message).mkString(",")).mkString(",")

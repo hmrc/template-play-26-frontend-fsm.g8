@@ -16,7 +16,7 @@
 
 package $package$.journey
 import uk.gov.hmrc.http.HeaderCarrier
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Start}
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions}
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.Transitions._
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.{State, Transition}
 import $package$.journeys.$servicenameCamel$FrontendJourneyService
@@ -38,11 +38,11 @@ class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[St
   }
 
   "$servicenameCamel$FrontendModel" when {
-    "at state Start" should {
-      "transition to End when Start submitted a form" in {
-        given(Start) when submitStart("001.H")(
+    "at state Questions" should {
+      "go to Confirmation when provided with a form data" in {
+        given(Questions()) when gotoConfirmation("001.H")(
           $servicenameCamel$FrontendModel("Henry", None, None, None)) should thenGo(
-          End("Henry", None, None, None))
+          Confirmation($servicenameCamel$FrontendModel("Henry", None, None, None)))
       }
     }
   }

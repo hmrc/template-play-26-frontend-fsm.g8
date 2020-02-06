@@ -22,17 +22,20 @@ import uk.gov.hmrc.play.fsm.JsonStateFormats
 
 object $servicenameCamel$FrontendJourneyStateFormats extends JsonStateFormats[State] {
 
-  val EndFormat = Json.format[End]
+  val questionsFormat = Json.format[Questions]
+  val confirmationFormat = Json.format[Confirmation]
 
   override val serializeStateProperties: PartialFunction[State, JsValue] = {
-    case s: End => EndFormat.writes(s)
+    case s: Questions    => questionsFormat.writes(s)
+    case s: Confirmation => confirmationFormat.writes(s)
   }
 
   override def deserializeState(stateName: String, properties: JsValue): JsResult[State] =
     stateName match {
-      case "Start"     => JsSuccess(Start)
-      case "End"       => EndFormat.reads(properties)
-      case "SomeError" => JsSuccess(SomeError)
-      case _           => JsError(s"Unknown state name \$stateName")
+      case "Start"        => JsSuccess(Start)
+      case "Questions"    => questionsFormat.reads(properties)
+      case "Confirmation" => confirmationFormat.reads(properties)
+      case "SomeError"    => JsSuccess(SomeError)
+      case _              => JsError(s"Unknown state name \$stateName")
     }
 }

@@ -17,8 +17,9 @@
 package $package$.journey
 import play.api.libs.json.{Format, Json}
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Start}
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions, Start}
 import $package$.journeys.$servicenameCamel$FrontendJourneyStateFormats
+import $package$.models.$servicenameCamel$FrontendModel
 import uk.gov.hmrc.play.test.UnitSpec
 
 class $servicenameCamel$FrontendFormatSpec extends UnitSpec {
@@ -34,16 +35,28 @@ class $servicenameCamel$FrontendFormatSpec extends UnitSpec {
         Json.toJson(state) shouldBe json
         json.as[State] shouldBe state
       }
-      "End" in {
-        val state = End("Henry", Some("BN12 6BX"), Some("00000000001"), Some("henry@example.com"))
+      "Questions" in {
+        val state = Questions(None)
 
-        val json = Json.parse("""{"state":"End",
-                                |"properties":{
+        val json = Json.parse("""{"state":"Questions","properties":{}}""")
+        Json.toJson(state) shouldBe json
+        json.as[State] shouldBe state
+      }
+      "Summary" in {
+        val state = Confirmation(
+          $servicenameCamel$FrontendModel(
+            "Henry",
+            Some("BN12 6BX"),
+            Some("00000000001"),
+            Some("henry@example.com")))
+
+        val json = Json.parse("""{"state":"Confirmation",
+                                |"properties":{"formData":{
                                 | "name":"Henry",
                                 | "postcode":"BN12 6BX",
-                                | "telephone":"00000000001",
+                                | "telephoneNumber":"00000000001",
                                 | "emailAddress": "henry@example.com"
-                                |}}""".stripMargin)
+                                |}}}""".stripMargin)
         Json.toJson(state) shouldBe json
         json.as[State] shouldBe state
       }

@@ -4,6 +4,7 @@ import play.api.Application
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import $package$.models.$servicenameCamel$FrontendModel
 import $package$.support.BaseISpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,43 +27,61 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
 
   "$servicenameCamel$FrontendController" when {
 
-    "GET /start" should {
+    "GET /" should {
 
-      "redirect to start page with journeyId" in {
-        journeyState.set(Start, Nil)
-        val result = controller.showStart(FakeRequest())
+      "display start page" in {
+        val result = controller.showStart(fakeRequest)
+        status(result) shouldBe 200
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("start.title"))
+        journeyState.get shouldBe Some((Start, Nil))
+      }
+    }
+
+    "GET /questions" should {
+
+      "redirect to questions page" in {
+        journeyState.set(Questions(), Start :: Nil)
+        val result = controller.showQuestions(FakeRequest())
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("/$servicenameHyphen$")
       }
 
-      "display start page" in {
-        journeyState.set(Start, Nil)
-        val result = controller.showStart(fakeRequest)
+      "display questions page" in {
+        journeyState.set(Questions(), Start :: Nil)
+        val result = controller.showQuestions(fakeRequest)
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("start.title"))
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("questions.title"))
       }
     }
 
-    "POST /start" should {
-      "redirect to end page" in {
-        journeyState.set(Start, Nil)
-        val result = controller.submitStart(
+    "POST /questions" should {
+      "redirect to confirmation page" in {
+        journeyState.set(Questions(), Start :: Nil)
+        val result = controller.submitQuestions(
           fakeRequest.withFormUrlEncodedBody(
             "name"            -> "Henry",
             "postcode"        -> "",
             "telephoneNumber" -> "00000000001",
             "emailAddress"    -> "henry@example.com"))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.$servicenameCamel$FrontendController.showEnd().url)
+        redirectLocation(result) shouldBe Some(
+          routes.$servicenameCamel$FrontendController.showConfirmation().url)
       }
     }
 
-    "GET /end" should {
-      "display start page" in {
-        journeyState.set(End("name", Some("postcode"), Some("telephone"), Some("email")), Nil)
-        val result = controller.showEnd(fakeRequest)
+    "GET /confirmation" should {
+      "display confirmation page" in {
+        journeyState.set(
+          Confirmation(
+            $servicenameCamel$FrontendModel(
+              "name",
+              Some("postcode"),
+              Some("telephone"),
+              Some("email"))),
+          Questions() :: Start :: Nil)
+        val result = controller.showConfirmation(fakeRequest)
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("end.title"))
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("confirmation.title"))
       }
     }
   }

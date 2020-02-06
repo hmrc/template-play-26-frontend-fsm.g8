@@ -1,7 +1,7 @@
 # microservice specific routes
 
 GET         /                       @$package$.controllers.$servicenameCamel$FrontendController.showStart
-GET         /start                  @$package$.controllers.$servicenameCamel$FrontendController.showStart
-POST        /start                  @$package$.controllers.$servicenameCamel$FrontendController.submitStart
-GET         /end                    @$package$.controllers.$servicenameCamel$FrontendController.showEnd
+GET         /questions              @$package$.controllers.$servicenameCamel$FrontendController.showQuestions
+POST        /questions              @$package$.controllers.$servicenameCamel$FrontendController.submitQuestions
+GET         /confirmation           @$package$.controllers.$servicenameCamel$FrontendController.showConfirmation
 
