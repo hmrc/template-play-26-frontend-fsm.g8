@@ -24,7 +24,7 @@ import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import $package$.connectors.{FrontendAuthConnector, $servicenameCamel$Connector}
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{End, Start}
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions, Start}
 import $package$.journeys.$servicenameCamel$FrontendJourneyService
 import $package$.models.$servicenameCamel$FrontendModel
 import $package$.views.html.{main_template, _}
@@ -59,32 +59,59 @@ class $servicenameCamel$FrontendController @Inject()(
     withAuthorisedAsHuman(_)
   }
 
-  val showStart = actionShowStateWhenAuthorised(AsHuman) {
-    case Start =>
+  // GET /
+  val showStart = action { implicit request =>
+    apply(Transitions.start, display).andThen {
+      case Success(_) =>
+        journeyService.cleanBreadcrumbs()
+    }
   }
 
-  val submitStart = action { implicit request =>
-    whenAuthorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.submitStart)
+  // GET /questions
+  val showQuestions = action { implicit request =>
+    whenAuthorised(AsHuman)(Transitions.gotoQuestions)(display)
   }
 
-  val showEnd = action { implicit request =>
+  // POST /questions
+  val submitQuestions = action { implicit request =>
+    whenAuthorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.gotoConfirmation)
+  }
+
+  // GET /confirmation
+  val showConfirmation = action { implicit request =>
     showStateWhenAuthorised(AsHuman) {
-      case _: End =>
-    }.andThen {
-      case Success(_) => journeyService.cleanBreadcrumbs()
+      case _: Confirmation =>
     }
   }
 
   override def getCallFor(state: State)(implicit request: Request[_]): Call = state match {
-    case Start  => routes.$servicenameCamel$FrontendController.showStart()
-    case _: End => routes.$servicenameCamel$FrontendController.showEnd()
+    case Start           => routes.$servicenameCamel$FrontendController.showStart()
+    case _: Questions    => routes.$servicenameCamel$FrontendController.showQuestions()
+    case _: Confirmation => routes.$servicenameCamel$FrontendController.showConfirmation()
   }
+
+  import uk.gov.hmrc.play.fsm.OptionalFormOps._
+
+  val startPage = new start(mainTemplate)
+  val questionsPage = new questions(mainTemplate, input, form, errorSummary)
+  val confirmationPage = new confirmation(mainTemplate)
 
   override def renderState(state: State, breadcrumbs: List[State], formWithErrors: Option[Form[_]])(
     implicit request: Request[_]): Result = state match {
+
     case Start =>
-      Ok(new start_page(mainTemplate, input, form, errorSummary)($servicenameCamel$FrontendForm))
-    case _: End => Ok(new end(mainTemplate)($servicenameCamel$FrontendForm))
+      Ok(startPage(routes.$servicenameCamel$FrontendController.showQuestions()))
+
+    case Questions(maybeFormData) =>
+      val form: Form[$servicenameCamel$FrontendModel] = formWithErrors
+        .or(
+          maybeFormData
+            .map(formData => $servicenameCamel$FrontendForm.fill(formData))
+            .getOrElse($servicenameCamel$FrontendForm))
+      Ok(questionsPage(form, routes.$servicenameCamel$FrontendController.submitQuestions()))
+
+    case Confirmation(formData) =>
+      Ok(confirmationPage(formData, getCallFor(Questions(Some(formData))), getCallFor(Start)))
   }
 
   override implicit def context(implicit rh: RequestHeader): HeaderCarrier =

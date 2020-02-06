@@ -68,13 +68,13 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
         sentEvent.auditType shouldBe "$servicenameCamel$FrontendSomethingHappened"
-        sentEvent.auditSource shouldBe "new-shiny-service-26-frontend"
+        sentEvent.auditSource shouldBe "$servicenameHyphen$-frontend"
         sentEvent.detail("agentReference") shouldBe "ARN0001"
         sentEvent.detail("name") shouldBe "John Smith"
         sentEvent.detail("telephoneNumber") shouldBe "12313"
         sentEvent.detail("emailAddress") shouldBe "john.smith@email.com"
 
-        sentEvent.tags("transactionName") shouldBe "new-shiny-service-26-frontend-something-happened"
+        sentEvent.tags("transactionName") shouldBe "$servicenameHyphen$-frontend-something-happened"
         sentEvent.tags("path") shouldBe "/path"
         sentEvent.tags("X-Session-ID") shouldBe "dummy session journeyId"
         sentEvent.tags("X-Request-ID") shouldBe "dummy request journeyId"

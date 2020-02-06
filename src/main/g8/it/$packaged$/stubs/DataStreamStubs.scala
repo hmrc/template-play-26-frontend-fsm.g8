@@ -17,7 +17,7 @@ trait DataStreamStubs extends Eventually {
       verify(count, postRequestedFor(urlPathEqualTo(auditUrl))
         .withRequestBody(similarToJson(
           s"""{
-              |  "auditSource": "new-shiny-service-26-frontend",
+              |  "auditSource": "$servicenameHyphen$-frontend",
               |  "auditType": "\$event",
               |  "tags": \${Json.toJson(tags)},
               |  "detail": \${Json.toJson(detail)}
@@ -30,7 +30,7 @@ trait DataStreamStubs extends Eventually {
       verify(0, postRequestedFor(urlPathEqualTo(auditUrl))
         .withRequestBody(similarToJson(
           s"""{
-              |  "auditSource": "new-shiny-service-26-frontend",
+              |  "auditSource": "$servicenameHyphen$-frontend",
               |  "auditType": "\$event"
               |}""")))
     }

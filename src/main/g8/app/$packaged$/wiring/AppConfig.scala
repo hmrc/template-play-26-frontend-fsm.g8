@@ -39,6 +39,6 @@ class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
   val someString = config.getString("someString")
   val someBoolean = config.getBoolean("someBoolean")
   val authBaseUrl = config.baseUrl("auth")
-  val serviceBaseUrl = config.baseUrl("new-shiny-service-26")
+  val serviceBaseUrl = config.baseUrl("$servicenameHyphen$")
   val mongoSessionExpiryTime: Int = config.getInt("mongodb.session.expireAfterSeconds")
 }

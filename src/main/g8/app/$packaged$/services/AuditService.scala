@@ -47,7 +47,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
     ec: ExecutionContext): Unit =
     auditEvent(
       $servicenameCamel$FrontendEvent.$servicenameCamel$FrontendSomethingHappened,
-      "new-shiny-service-26-frontend-something-happened",
+      "$servicenameHyphen$-frontend-something-happened",
       Seq(
         "agentReference"  -> agentReference.value,
         "name"            -> model.name,
@@ -76,7 +76,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
     val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString): _*)
     val tags = hc.toAuditTags(transactionName, request.path)
     DataEvent(
-      auditSource = "new-shiny-service-26-frontend",
+      auditSource = "$servicenameHyphen$-frontend",
       auditType = event.toString,
       tags = tags,
       detail = detail)

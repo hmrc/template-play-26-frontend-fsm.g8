@@ -21,6 +21,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.i18n.{Lang, Messages, MessagesImpl}
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
@@ -70,14 +71,15 @@ class ViewsSpec @Inject()(govUkWrapper: govuk_wrapper, mainTemplate: main_templa
     }
   }
 
-  "start view" should {
+  "questions view" should {
     "render title and messages" in new App {
       val input = new Input()
       val form = new FormWithCSRF()
       val errorSummary = new ErrorSummary()
-      val html = new start_page(mainTemplate, input, form, errorSummary)
+      val html = new questions(mainTemplate, input, form, errorSummary)
         .render(
-          $servicenamecamel$FrontendForm = $servicenameCamel$FrontendForm,
+          myForm = $servicenameCamel$FrontendForm,
+          submitCall = Call("GET", "/"),
           request = FakeRequest(),
           messages = MessagesImpl(lang, stubMessagesApi()),
           config = app.configuration
@@ -85,14 +87,14 @@ class ViewsSpec @Inject()(govUkWrapper: govuk_wrapper, mainTemplate: main_templa
       val content = contentAsString(html)
 
       implicit val messagesProvider = MessagesImpl(lang, stubMessagesApi())
-      content should include(Messages("start.title"))
-      content should include(Messages("start.label"))
-      content should include(Messages("start.intro"))
-      content should include(Messages("start.helpdesklink.text1"))
-      content should include(Messages("start.helpdesklink.text2"))
+      content should include(Messages("questions.title"))
+      content should include(Messages("questions.label"))
+      content should include(Messages("questions.intro"))
+      content should include(Messages("questions.helpdesklink.text1"))
+      content should include(Messages("questions.helpdesklink.text2"))
 
-      val html2 = new start_page(mainTemplate, input, form, errorSummary)
-        .f($servicenameCamel$FrontendForm)(
+      val html2 = new questions(mainTemplate, input, form, errorSummary)
+        .f($servicenameCamel$FrontendForm, Call("GET", "/"))(
           FakeRequest(),
           MessagesImpl(lang, stubMessagesApi()),
           app.configuration)

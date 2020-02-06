@@ -1,6 +1,6 @@
 # Validation errors
 error.prefix=Error:
-error.end.heading=There is a problem
+error.summary.heading=There is a problem
 error.postcode.invalid=You can only enter these characters: A-Z 0-9
 error.telephone.invalid=You can only enter these characters: 0-9 ( ) space
 error.string.invalid=You can only enter these characters: a-z A-Z 0-9 ,.() - ! @ space
@@ -9,32 +9,45 @@ error.email=Enter a valid email address
 
 # Service specific messages
 app.name=New Shiny Service 26
-servicename.titleSuffix=New Shiny Service 26 - GOV.UK
+app.titleSuffix=New Shiny Service 26 - GOV.UK
+
+app.header.parameters=Parameters
+app.header.contactDetails=Contact details
+app.header.name=Name:
+app.header.telephoneNumber=Telephone number:
+app.header.emailAddress=Email address:
 
 # Start page
-start.title=New Shiny Service 26
+
+start.title=Start
 start.label=New Shiny Service 26
 start.intro=Describe purpose of your service / journey
-start.helpdesklink.text1=Contact the online services helpdesk
-start.helpdesklink.text2=if you need help.
+
+# Questions page
+questions.title=Questions
+questions.label=Questions
+questions.intro=Ask user some questions
+questions.helpdesklink.text1=Contact the online services helpdesk
+questions.helpdesklink.text2=if you need help.
 
 # MyForm page
-newshinyservice26frontendform.title=New Shiny Service 26 NewShinyService26FrontendForm
-newshinyservice26frontendform.label=Enter your 1st parameter
-newshinyservice26frontendform.description=This could be random characters.
-newshinyservice26frontendform.name.label=Name
-newshinyservice26frontendform.telephoneNumber.label=Telephone number
-newshinyservice26frontendform.emailAddress.label=Email address
+$servicenamecamel$Frontend.form.title=New Shiny Service 26 NewShinyService26FrontendForm
+$servicenamecamel$Frontend.form.label=Enter your 1st parameter
+$servicenamecamel$Frontend.form.description=This could be random characters.
+$servicenamecamel$Frontend.form.name.label=Name
+$servicenamecamel$Frontend.form.telephoneNumber.label=Telephone number
+$servicenamecamel$Frontend.form.postcode.label=Postcode
+$servicenamecamel$Frontend.form.emailAddress.label=E-mail address
 
-# end page
-end.title=New Shiny Service 26 end
-end.label=Check your answers
-end.link.change=Edit
-end.header.parameters=Parameters
-end.header.contactDetails=Contact details
-end.name=Name:
-end.telephoneNumber=Telephone number:
-end.emailAddress=Email address:
+# Confirmation page
+confirmation.title=Check your answers
+confirmation.label=Check your answers
+confirmation.link.change=Edit
 
 button.continue=Continue
 button.submit=Submit
+
+# Global errors
+global.error.500.title=Check Settled Status - GOV.UK
+global.error.500.heading=Sorry, there is a problem with the service
+global.error.500.message=Try again later.

@@ -19,7 +19,7 @@ How to create a new project based on the template?
 * Decide your service name (the hardest part :))
 * Run the command
 
-    `g8 hmrc/template-play-26-frontend-fsm.g8 --package=uk.gov.hmrc.newshinyservice26fsmfrontend --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999"`
+    `g8 HMRC/template-play-26-frontend-fsm.g8 --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999" --package="uk.gov.hmrc.newshinyservice26fsmfrontend"`
     
 and then
     
@@ -116,12 +116,13 @@ and produce the folders and files as shown below:
 	│                   │   └── AuditService.scala
 	│                   │
 	│                   ├── views
-	│                   │   ├── end.scala.html
+	│                   │   ├── confirmation.scala.html
 	│                   │   ├── error_prefix.scala.html
 	│                   │   ├── error_template.scala.html
 	│                   │   ├── govuk_wrapper.scala.html
 	│                   │   ├── main_template.scala.html
-	│                   │   └── start_page.scala.html
+	│                   │   ├── questions.scala.html
+	│                   │   └── start.scala.html
 	│                   │
 	│                   └── wiring
 	│                       └── AppConfig.scala

@@ -25,7 +25,7 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     extends AbstractModule {
 
   def configure(): Unit = {
-    val appName = "new-shiny-service-26-frontend"
+    val appName = "$servicenameHyphen$-frontend"
     Logger(getClass).info(s"Starting microservice : \$appName : in mode : \${environment.mode}")
 
     bind(classOf[HttpGet]).to(classOf[DefaultHttpClient])
