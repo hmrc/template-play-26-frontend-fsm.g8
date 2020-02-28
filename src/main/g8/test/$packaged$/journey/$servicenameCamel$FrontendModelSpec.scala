@@ -15,27 +15,21 @@
  */
 
 package $package$.journey
-import uk.gov.hmrc.http.HeaderCarrier
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions}
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.Transitions._
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.{State, Transition}
-import $package$.journeys.$servicenameCamel$FrontendJourneyService
 import $package$.models.$servicenameCamel$FrontendModel
+import $package$.services.$servicenameCamel$FrontendJourneyService
+import $package$.support.{InMemoryStore, StateMatchers}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[State] {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  case class given(initialState: State)
-      extends $servicenameCamel$FrontendJourneyService with TestStorage[(State, List[State])] {
-    await(save((initialState, Nil)))
-
-    def when(transition: Transition): (State, List[State]) =
-      await(super.apply(transition))
-  }
+  // dummy journey context
+  case class DummyContext()
+  implicit val dummyContext: DummyContext = DummyContext()
 
   "$servicenameCamel$FrontendModel" when {
     "at state Questions" should {
@@ -45,5 +39,17 @@ class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[St
           Confirmation($servicenameCamel$FrontendModel("Henry", None, None, None)))
       }
     }
+  }
+
+  // TEST UTILITIES
+
+  case class given(initialState: State)
+      extends $servicenameCamel$FrontendJourneyService[DummyContext]
+      with InMemoryStore[(State, List[State]), DummyContext] {
+
+    await(save((initialState, Nil)))
+
+    def when(transition: Transition): (State, List[State]) =
+      await(super.apply(transition))
   }
 }

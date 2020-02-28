@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package $package$.journey
+package $package$.support
 
 import org.scalatest.matchers.{MatchResult, Matcher}
 

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package $package$.journey
+package $package$.repository
 
-import uk.gov.hmrc.http.HeaderCarrier
+import javax.inject.Inject
+import play.modules.reactivemongo.ReactiveMongoComponent
+import uk.gov.hmrc.cache.repository.CacheMongoRepository
+import $package$.wiring.AppConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-trait TestStorage[S] {
-
-  @volatile
-  private var state: Option[S] = None
-
-  def fetch(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[S]] =
-    Future.successful(state)
-  def save(newState: S)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[S] = Future {
-    state = Some(newState); newState
-  }
-}
+/**
+  * Mongo repository to short-term store the encrypted journeys.
+  */
+class JourneyCacheRepository @Inject()(appConfig: AppConfig, mongo: ReactiveMongoComponent)(
+  implicit ec: ExecutionContext)
+    extends CacheMongoRepository("journeys", appConfig.mongoSessionExpiryTime)(
+      mongo.mongoConnector.db,
+      ec)

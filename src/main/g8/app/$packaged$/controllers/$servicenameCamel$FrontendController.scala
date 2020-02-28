@@ -25,8 +25,8 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import $package$.connectors.{FrontendAuthConnector, $servicenameCamel$Connector}
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions, Start}
-import $package$.journeys.$servicenameCamel$FrontendJourneyService
 import $package$.models.$servicenameCamel$FrontendModel
+import $package$.services.$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
 import $package$.views.html.{main_template, _}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.play.fsm.{JourneyController, JourneyIdSupport}
@@ -45,7 +45,7 @@ class $servicenameCamel$FrontendController @Inject()(
   form: FormWithCSRF,
   errorSummary: ErrorSummary,
   mainTemplate: main_template,
-  override val journeyService: $servicenameCamel$FrontendJourneyService,
+  override val journeyService: $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier,
   controllerComponents: MessagesControllerComponents)(
   implicit val configuration: Configuration,
   ec: ExecutionContext)

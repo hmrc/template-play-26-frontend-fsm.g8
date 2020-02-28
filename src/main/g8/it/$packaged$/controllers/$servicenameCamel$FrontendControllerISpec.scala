@@ -1,29 +1,20 @@
 package $package$.controllers
 
 import play.api.Application
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import $package$.models.$servicenameCamel$FrontendModel
-import $package$.support.BaseISpec
+import $package$.services.$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
+import $package$.support.{AppISpec, InMemoryJourneyService, TestJourneyService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
+class $servicenameCamel$FrontendControllerISpec
+    extends $servicenameCamel$FrontendControllerISpecSetup {
 
-  private lazy val controller: $servicenameCamel$FrontendController =
-    app.injector.instanceOf[$servicenameCamel$FrontendController]
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  override implicit lazy val app: Application = appBuilder
-    .overrides(new TestAgentInvitationJourneyModule)
-    .build()
-
-  lazy val journeyState = app.injector.instanceOf[Test$servicenameCamel$FrontendJourneyService]
-
-  import journeyState.model.State._
-
-  def fakeRequest = FakeRequest().withSession(controller.journeyService.journeyKey -> "fooId")
+  import journey.model.State._
 
   "$servicenameCamel$FrontendController" when {
 
@@ -33,21 +24,21 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
         val result = controller.showStart(fakeRequest)
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("start.title"))
-        journeyState.get shouldBe Some((Start, Nil))
+        journey.get shouldBe Some((Start, Nil))
       }
     }
 
     "GET /questions" should {
 
       "redirect to questions page" in {
-        journeyState.set(Questions(), Start :: Nil)
+        journey.set(Questions(), Start :: Nil)
         val result = controller.showQuestions(FakeRequest())
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("/$servicenameHyphen$")
       }
 
       "display questions page" in {
-        journeyState.set(Questions(), Start :: Nil)
+        journey.set(Questions(), Start :: Nil)
         val result = controller.showQuestions(fakeRequest)
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("questions.title"))
@@ -56,7 +47,7 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
 
     "POST /questions" should {
       "redirect to confirmation page" in {
-        journeyState.set(Questions(), Start :: Nil)
+        journey.set(Questions(), Start :: Nil)
         val result = controller.submitQuestions(
           fakeRequest.withFormUrlEncodedBody(
             "name"            -> "Henry",
@@ -71,7 +62,7 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
 
     "GET /confirmation" should {
       "display confirmation page" in {
-        journeyState.set(
+        journey.set(
           Confirmation(
             $servicenameCamel$FrontendModel(
               "name",
@@ -85,5 +76,29 @@ class $servicenameCamel$FrontendControllerISpec extends BaseISpec {
       }
     }
   }
+
+}
+
+class TestInMemory$servicenameCamel$FrontendJourneyService
+    extends $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
+    with InMemoryJourneyService[HeaderCarrier] with TestJourneyService[HeaderCarrier]
+
+trait $servicenameCamel$FrontendControllerISpecSetup extends AppISpec {
+
+  override def fakeApplication: Application =
+    appBuilder
+      .overrides(
+        bind(classOf[$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier])
+          .to(classOf[TestInMemory$servicenameCamel$FrontendJourneyService]))
+      .build()
+
+  lazy val controller: $servicenameCamel$FrontendController =
+    app.injector.instanceOf[$servicenameCamel$FrontendController]
+
+  lazy val journey: TestInMemory$servicenameCamel$FrontendJourneyService =
+    controller.journeyService
+      .asInstanceOf[TestInMemory$servicenameCamel$FrontendJourneyService]
+
+  def fakeRequest = FakeRequest().withSession(controller.journeyService.journeyKey -> "fooId")
 
 }

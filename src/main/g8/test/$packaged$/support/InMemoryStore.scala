@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package $package$.repository
+package $package$.support
 
-import javax.inject.{Inject, Singleton}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.cache.repository.CacheMongoRepository
-import $package$.wiring.AppConfig
+import java.util.concurrent.atomic.AtomicReference
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class SessionCacheRepository @Inject()(appConfig: AppConfig, mongo: ReactiveMongoComponent)(
-  implicit ec: ExecutionContext)
-    extends CacheMongoRepository("sessions", appConfig.mongoSessionExpiryTime)(
-      mongo.mongoConnector.db,
-      ec)
+/**
+  * Basic in-memory store used to test journeys.
+  */
+trait InMemoryStore[S, C] {
+
+  private val state = new AtomicReference[Option[S]](None)
+
+  def fetch(implicit requestContext: C, ec: ExecutionContext): Future[Option[S]] =
+    Future.successful(state.get)
+
+  def save(newState: S)(implicit requestContext: C, ec: ExecutionContext): Future[S] = Future {
+    state.set(Some(newState))
+    newState
+  }
+}
