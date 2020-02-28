@@ -14,29 +14,47 @@
  * limitations under the License.
  */
 
-package $package$.repository
+package $package$.services
 
 import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.cache.model.Id
 import uk.gov.hmrc.cache.repository.CacheRepository
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MongoSessionStore[T] {
-
-  implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
+/**
+  * Generic short-term session store based on mongo-caching.
+  */
+trait SessionCache[T, C] {
 
   val sessionName: String
   val cacheRepository: CacheRepository
 
-  def getSessionId(implicit hc: HeaderCarrier): Option[String] =
-    hc.sessionId.map(_.value)
+  def getSessionId(implicit requestContext: C): Option[String]
 
-  def get(
+  def fetch(implicit requestContext: C, reads: Reads[T], ec: ExecutionContext): Future[Option[T]] =
+    get.flatMap {
+      case Right(cache) => cache
+      case Left(error) =>
+        Logger.warn(error)
+        Future.failed(new RuntimeException(error))
+    }
+
+  def save(
+    input: T)(implicit requestContext: C, writes: Writes[T], ec: ExecutionContext): Future[T] =
+    store(input).flatMap {
+      case Right(_) => input
+      case Left(error) =>
+        Logger.warn(error)
+        Future.failed(new RuntimeException(error))
+    }
+
+  implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
+
+  private def get(
     implicit reads: Reads[T],
-    hc: HeaderCarrier,
+    requestContext: C,
     ec: ExecutionContext): Future[Either[String, Option[T]]] =
     getSessionId match {
       case Some(sessionId) ⇒
@@ -47,8 +65,8 @@ trait MongoSessionStore[T] {
             case Some(cache) =>
               (cache \\ sessionName).asOpt[JsValue] match {
                 case None => Right(None)
-                case Some(value: JsValue) =>
-                  value.validate[T] match {
+                case Some(obj: JsValue) =>
+                  obj.validate[T] match {
                     case JsSuccess(p, _) => Right(Some(p))
                     case JsError(errors) =>
                       val allErrors = errors.map(_._2.map(_.message).mkString(",")).mkString(",")
@@ -67,9 +85,9 @@ trait MongoSessionStore[T] {
         Right(None)
     }
 
-  def store(newSession: T)(
+  private def store(newSession: T)(
     implicit writes: Writes[T],
-    hc: HeaderCarrier,
+    requestContext: C,
     ec: ExecutionContext): Future[Either[String, Unit]] =
     getSessionId match {
       case Some(sessionId) ⇒
@@ -93,7 +111,7 @@ trait MongoSessionStore[T] {
         Left(s"no sessionId found in the HeaderCarrier to store in mongo")
     }
 
-  def delete()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] =
+  def delete()(implicit requestContext: C, ec: ExecutionContext): Future[Either[String, Unit]] =
     getSessionId match {
       case Some(sessionId) ⇒
         cacheRepository

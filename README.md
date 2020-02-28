@@ -1,4 +1,5 @@
 A [Giter8](http://www.foundweekends.org/giter8/) template for creating HMRC Digital Scala Play 2.6 Stateful Frontend
+
 What's inside?
 ==
 
@@ -101,19 +102,19 @@ and produce the folders and files as shown below:
 	│                   │
 	│                   ├── journeys
 	│                   │   ├── NewShinyService26FsmFrontendJourneyModel.scala
-	│                   │   ├── NewShinyService26FsmFrontendJourneyService.scala
 	│                   │   └── NewShinyService26FsmFrontendJourneyStateFormats.scala
 	│                   │
 	│                   ├── models
 	│                   │   └── NewShinyService26FsmFrontendModel.scala
 	│                   │
 	│                   ├── repository
-	│                   │   ├── MongoSessionStore.scala
-	│                   │   ├── SessionCache.scala
-	│                   │   └── SessionCacheRepository.scala
+	│                   │   └── JourneyCacheRepository.scala
 	│                   │
 	│                   ├── services
-	│                   │   └── AuditService.scala
+	│                   │   ├── AuditService.scala
+	│                   │   ├── MongoDBCachedJourneyService.scala
+	│                   │   ├── NewShinyService26FsmFrontendJourneyService.scala
+	│                   │   └── SessionCache.scala
 	│                   │
 	│                   ├── views
 	│                   │   ├── confirmation.scala.html
@@ -148,15 +149,20 @@ and produce the folders and files as shown below:
 	│                   ├── controllers
 	│                   │   ├── AuthActionsISpec.scala
 	│                   │   ├── NewShinyService26FsmFrontendControllerISpec.scala
-	│                   │   └── TestNewShinyService26FsmJourneyService.scala
+	│                   │   └── NewShinyService26FsmFrontendISpec.scala
 	│                   │
 	│                   ├── stubs
 	│                   │   ├── AuthStubs.scala
 	│                   │   └── DataStreamStubs.scala
 	│                   │
 	│                   └── support
+	│                       ├── AppISpec.scala
 	│                       ├── BaseISpec.scala
+	│                       ├── InMemoryJourneyService.scala
 	│                       ├── MetricsTestSupport.scala
+	│                       ├── ServerISpec.scala
+	│                       ├── TestAppConfig.scala
+	│                       ├── TestJourneyService.scala
 	│                       └── WireMockSupport.scala
 	│
 	├── LICENSE
@@ -176,12 +182,14 @@ and produce the folders and files as shown below:
 	                    │
 	                    ├── journey
 	                    │   ├── NewShinyService26FsmFrontendFormatSpec.scala
-	                    │   ├── NewShinyService26FsmFrontendModelSpec.scala
-	                    │   ├── StateMatchers.scala
-	                    │   └── TestStorage.scala
+	                    │   └── NewShinyService26FsmFrontendModelSpec.scala
 	                    │
 	                    ├── services
 	                    │   └── AuditServiceSpec.scala
+	                    │
+	                    ├── support
+	                    │   ├── InMemoryStore.scala
+	                    │   └── StateMatchers.scala
 	                    │
 	                    └── views
 	                        └── ViewsSpec.scala
