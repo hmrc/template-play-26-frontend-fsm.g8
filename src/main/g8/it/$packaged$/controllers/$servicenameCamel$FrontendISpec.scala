@@ -10,25 +10,41 @@ import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import $package$.journeys.$servicenameCamel$FrontendJourneyStateFormats
 import $package$.services.{MongoDBCachedJourneyService, $servicenameCamel$FrontendJourneyService}
+import $package$.stubs.{JourneyTestData, $servicenameCamel$Stubs}
 import $package$.support.{ServerISpec, TestJourneyService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class $servicenameCamel$FrontendISpec extends $servicenameCamel$FrontendISpecSetup {
+class $servicenameCamel$FrontendISpec
+    extends $servicenameCamel$FrontendISpecSetup with $servicenameCamel$Stubs with JourneyTestData {
 
   import journey.model.State._
 
-  "$servicenameCamel$FrontendController" when {
+  "$servicenameCamel$Frontend" when {
 
-    "GET /" should {
-
-      "display the start page" in {
+    "GET /$serviceUrlPrefixHyphen$/" should {
+      "show the start page" in {
         implicit val journeyId: JourneyId = JourneyId()
+        givenAuthorisedForEnrolment(Enrolment("HMRC-XYZ", "EORINumber","foo"))
 
         val result = await(request("/").get())
 
         result.status shouldBe 200
-        result.body should include(htmlEscapedMessage("start.title"))
+        result.body should include(htmlEscapedMessage("view.start.title"))
         journey.getState shouldBe Start
+      }
+    }
+
+    "GET /$serviceUrlPrefixHyphen$/foo" should {
+      "return an error page not found" in {
+        implicit val journeyId: JourneyId = JourneyId()
+        givenAuthorisedForEnrolment(Enrolment("HMRC-XYZ", "EORINumber","foo"))
+
+        val result = await(request("/foo").get())
+
+        result.status shouldBe 404
+        result.body should include("This page can’t be found")
+        journey.get shouldBe None
       }
     }
   }
@@ -37,13 +53,15 @@ class $servicenameCamel$FrontendISpec extends $servicenameCamel$FrontendISpecSet
 
 trait $servicenameCamel$FrontendISpecSetup extends ServerISpec {
 
-  val baseUrl: String = s"http://localhost:\$port/$servicenameHyphen$"
-
   override def fakeApplication: Application = appBuilder.build()
 
+  lazy val wsClient: WSClient = app.injector.instanceOf[WSClient]
+  lazy val sessionCookieBaker: SessionCookieBaker = app.injector.instanceOf[SessionCookieBaker]
+
+  case class JourneyId(value: String = UUID.randomUUID().toString)
+
   // define test service capable of manipulating journey state
-  lazy val journey = new TestJourneyService[JourneyId]
-  with $servicenameCamel$FrontendJourneyService[JourneyId]
+  lazy val journey = new TestJourneyService[JourneyId] with $servicenameCamel$FrontendJourneyService[JourneyId]
   with MongoDBCachedJourneyService[JourneyId] {
 
     override lazy val cacheMongoRepository = app.injector.instanceOf[CacheMongoRepository]
@@ -54,6 +72,8 @@ trait $servicenameCamel$FrontendISpecSetup extends ServerISpec {
 
     override def getJourneyId(journeyId: JourneyId): Option[String] = Some(journeyId.value)
   }
+
+  val baseUrl: String = s"http://localhost:\$port/$serviceUrlPrefixHyphen$"
 
   def request(path: String)(implicit journeyId: JourneyId) =
     wsClient

@@ -16,20 +16,17 @@ trait TestJourneyService[RequestContext] extends PersistentJourneyService[Reques
     timeout: Duration,
     ec: ExecutionContext): Unit = Await.result(save((state, breadcrumbs)), timeout)
 
-  def setState(state: model.State)(
-    implicit requestContext: RequestContext,
-    timeout: Duration,
-    ec: ExecutionContext): Unit = Await.result(save((state, Nil)), timeout)
+  def setState(
+    state: model.State)(implicit requestContext: RequestContext, timeout: Duration, ec: ExecutionContext): Unit =
+    Await.result(save((state, Nil)), timeout)
 
   def get(
     implicit requestContext: RequestContext,
     timeout: Duration,
     ec: ExecutionContext): Option[StateAndBreadcrumbs] = Await.result(fetch, timeout)
 
-  def getState(
-    implicit requestContext: RequestContext,
-    timeout: Duration,
-    ec: ExecutionContext): model.State = get.get._1
+  def getState(implicit requestContext: RequestContext, timeout: Duration, ec: ExecutionContext): model.State =
+    get.get._1
 
   def getBreadcrumbs(
     implicit requestContext: RequestContext,

@@ -23,11 +23,6 @@ import $package$.wiring.AppConfig
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * Mongo repository to short-term store the encrypted journeys.
-  */
 class JourneyCacheRepository @Inject()(appConfig: AppConfig, mongo: ReactiveMongoComponent)(
   implicit ec: ExecutionContext)
-    extends CacheMongoRepository("journeys", appConfig.mongoSessionExpiryTime)(
-      mongo.mongoConnector.db,
-      ec)
+    extends CacheMongoRepository("journeys", appConfig.mongoSessionExpiryTime)(mongo.mongoConnector.db, ec)

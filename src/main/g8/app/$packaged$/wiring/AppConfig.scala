@@ -19,26 +19,79 @@ package $package$.wiring
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
+import play.api.i18n.Lang
+import play.api.mvc.{Call, RequestHeader}
+import scala.util.Try
 
 @ImplementedBy(classOf[AppConfigImpl])
 trait AppConfig {
 
+  val host: String
   val appName: String
-  val someInt: Int
-  val someString: String
-  val someBoolean: Boolean
   val authBaseUrl: String
-  val serviceBaseUrl: String
+  val $servicenamecamel$ApiBaseUrl: String
   val mongoSessionExpiryTime: Int
+  val authorisedServiceName: String
+  val authorisedIdentifierKey: String
+  val authorisedStrideGroup: String
+  val subscriptionJourneyUrl: String
+
+  val languageMap: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy")
+  )
+
+  val gtmContainer: Option[String]
+
+  def routeToSwitchLanguage: String => Call =
+    (lang: String) => $package$.controllers.routes.LanguageSwitchController.switchToLanguage(lang)
+
+  val contactHost: String
+  val contactFormServiceIdentifier: String
+  val exitSurveyUrl: String
+  def requestUri(implicit request: RequestHeader): String = SafeRedirectUrl(host + request.uri).encodedUrl
+  def feedbackUrl(implicit request: RequestHeader): String =
+    s"\$contactHost/contact/beta-feedback?service=\$contactFormServiceIdentifier&backUrl=\$requestUri"
+
+  val signOutUrl: String
+  val researchBannerUrl: String
+
 }
 
 class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
-  val appName = config.getString("appName")
 
-  val someInt = config.getInt("someInt")
-  val someString = config.getString("someString")
-  val someBoolean = config.getBoolean("someBoolean")
-  val authBaseUrl = config.baseUrl("auth")
-  val serviceBaseUrl = config.baseUrl("$servicenameHyphen$")
+  val host: String = config.getString("host")
+
+  val appName: String = config.getString("appName")
+
+  val authBaseUrl: String = config.baseUrl("auth")
+
+  val $servicenamecamel$ApiBaseUrl: String = config.baseUrl("$servicenameHyphen$-api")
+
   val mongoSessionExpiryTime: Int = config.getInt("mongodb.session.expireAfterSeconds")
+
+  val authorisedServiceName: String = config.getString("authorisedServiceName")
+
+  val authorisedIdentifierKey: String = config.getString("authorisedIdentifierKey")
+
+  val authorisedStrideGroup: String = config.getString("authorisedStrideGroup")
+
+  val subscriptionJourneyUrl: String = config.getString("subscriptionJourneyUrl")
+
+  val gtmContainer: Option[String] = (Try {
+    config.getString("gtm.container")
+  } map {
+    case "main"         => Some("GTM-NDJKHWK")
+    case "transitional" => Some("GTM-TSFTCWZ")
+  }) getOrElse None
+
+  val contactHost: String = config.getString("contact-frontend.host")
+  val contactFormServiceIdentifier: String = config.getString("feedback-frontend.formIdentifier")
+  val exitSurveyBaseUrl = config.getString("feedback-frontend.host") + config.getString("feedback-frontend.url")
+  val exitSurveyUrl = s"\$exitSurveyBaseUrl/\$contactFormServiceIdentifier"
+
+  val signOutUrl: String = config.getString("urls.signOut")
+  val researchBannerUrl: String = config.getString("urls.researchBanner")
+
 }

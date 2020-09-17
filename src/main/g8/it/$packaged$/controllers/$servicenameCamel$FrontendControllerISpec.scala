@@ -4,15 +4,18 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.HeaderCarrier
-import $package$.models.$servicenameCamel$FrontendModel
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Start}
+import $package$.models._
 import $package$.services.$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
+import $package$.stubs.{JourneyTestData, $servicenameCamel$Stubs}
 import $package$.support.{AppISpec, InMemoryJourneyService, TestJourneyService}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 class $servicenameCamel$FrontendControllerISpec
-    extends $servicenameCamel$FrontendControllerISpecSetup {
+    extends $servicenameCamel$FrontendControllerISpecSetup with $servicenameCamel$Stubs with JourneyStateHelpers {
 
   import journey.model.State._
 
@@ -20,70 +23,30 @@ class $servicenameCamel$FrontendControllerISpec
 
     "GET /" should {
 
-      "display start page" in {
+      "redirect to the start page" in {
+        givenAuthorisedForEnrolment(Enrolment("HMRC-XYZ", "EORINumber","foo"))
         val result = controller.showStart(fakeRequest)
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("start.title"))
         journey.get shouldBe Some((Start, Nil))
-      }
-    }
-
-    "GET /questions" should {
-
-      "redirect to questions page" in {
-        journey.set(Questions(), Start :: Nil)
-        val result = controller.showQuestions(FakeRequest())
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("/$servicenameHyphen$")
-      }
-
-      "display questions page" in {
-        journey.set(Questions(), Start :: Nil)
-        val result = controller.showQuestions(fakeRequest)
-        status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("questions.title"))
-      }
-    }
-
-    "POST /questions" should {
-      "redirect to confirmation page" in {
-        journey.set(Questions(), Start :: Nil)
-        val result = controller.submitQuestions(
-          fakeRequest.withFormUrlEncodedBody(
-            "name"            -> "Henry",
-            "postcode"        -> "",
-            "telephoneNumber" -> "00000000001",
-            "emailAddress"    -> "henry@example.com"))
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(
-          routes.$servicenameCamel$FrontendController.showConfirmation().url)
-      }
-    }
-
-    "GET /confirmation" should {
-      "display confirmation page" in {
-        journey.set(
-          Confirmation(
-            $servicenameCamel$FrontendModel(
-              "name",
-              Some("postcode"),
-              Some("telephone"),
-              Some("email"))),
-          Questions() :: Start :: Nil)
-        val result = controller.showConfirmation(fakeRequest)
-        status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("confirmation.title"))
       }
     }
   }
 
 }
 
+trait JourneyStateHelpers extends JourneyTestData {
+
+  def journey: TestInMemory$servicenameCamel$FrontendJourneyService
+
+}
+
 class TestInMemory$servicenameCamel$FrontendJourneyService
-    extends $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
-    with InMemoryJourneyService[HeaderCarrier] with TestJourneyService[HeaderCarrier]
+    extends $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier with InMemoryJourneyService[HeaderCarrier]
+    with TestJourneyService[HeaderCarrier]
 
 trait $servicenameCamel$FrontendControllerISpecSetup extends AppISpec {
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override def fakeApplication: Application =
     appBuilder

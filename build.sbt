@@ -2,7 +2,7 @@
 // To test the template run the script `./test.sh`
 // See http://www.foundweekends.org/giter8/testing.html#Using+the+Giter8Plugin for more details.
 lazy val root = (project in file(".")).settings(
-  name := "template-play-26-frontend-fsm.g8",
+  name := "template-play26-frontend-fsm.g8",
   description := "HMRC Digital Scala Play 2.6 Stateful Frontend",
   resolvers += Resolver.url("typesafe", url("http://repo.typesafe.com/typesafe/ivy-releases/"))(
     Resolver.ivyStylePatterns)
