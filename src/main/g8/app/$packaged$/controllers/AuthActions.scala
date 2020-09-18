@@ -16,38 +16,25 @@
 
 package $package$.controllers
 
+import play.api.Logger
+import play.api.mvc.Results.{Forbidden, Redirect}
 import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, MtdItId}
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.AuthProvider.{GovernmentGateway, PrivilegedApplication}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.authorisedEnrolments
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve._
+import $package$.support.CallOps
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthActions extends AuthorisedFunctions {
+trait AuthActions extends AuthorisedFunctions with AuthRedirects {
 
-  protected def withAuthorisedAsAgent[A](body: Arn => Future[Result])(
-    implicit request: Request[A],
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Result] =
-    withEnrolledFor("HMRC-AS-AGENT", "AgentReferenceNumber") {
-      case Some(arn) => body(Arn(arn))
-      case None =>
-        Future.failed(InsufficientEnrolments("AgentReferenceNumber identifier not found"))
-    }
+  def toSubscriptionJourney(continueUrl: String): Result
 
-  protected def withAuthorisedAsClient[A](body: MtdItId => Future[Result])(
-    implicit request: Request[A],
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Result] =
-    withEnrolledFor("HMRC-MTD-IT", "MTDITID") {
-      case Some(mtdItID) => body(MtdItId(mtdItID))
-      case None          => Future.failed(InsufficientEnrolments("MTDITID identifier not found"))
-    }
-
-  protected def withEnrolledFor[A](serviceName: String, identifierKey: String)(
-    body: Option[String] => Future[Result])(
+  protected def authorisedWithEnrolment[A](serviceName: String, identifierKey: String)(body: String => Future[Result])(
     implicit request: Request[A],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =
@@ -60,12 +47,49 @@ trait AuthActions extends AuthorisedFunctions {
           identifier <- enrolment.getIdentifier(identifierKey)
         } yield identifier.value
 
-        body(id)
+        id.map(body)
+          .getOrElse(throw new IllegalStateException(
+            s"Cannot find identifier key \$identifierKey for service name \$serviceName!"))
       }
+      .recover(handleFailure)
 
-  def withAuthorisedAsHuman[A](body: String => Future[Result])(
-    implicit request: Request[A],
+  def handleFailure(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+
+    case InsufficientEnrolments(_) =>
+      val continueUrl = CallOps.localFriendlyUrl(env, config)(request.uri, request.host)
+      toSubscriptionJourney(continueUrl)
+
+    case _: AuthorisationException ⇒
+      val continueUrl = CallOps.localFriendlyUrl(env, config)(request.uri, request.host)
+      toGGLogin(continueUrl)
+  }
+
+  protected def authorisedWithStrideGroup[A](authorisedStrideGroup: String)(body: String => Future[Result])(
+    implicit
+    request: Request[A],
     hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Result] = body("You are a human")
+    ec: ExecutionContext): Future[Result] = {
+    val authPredicate =
+      if (authorisedStrideGroup == "ANY") AuthProviders(PrivilegedApplication)
+      else Enrolment(authorisedStrideGroup) and AuthProviders(PrivilegedApplication)
+    authorised(authPredicate)
+      .retrieve(credentials and allEnrolments) {
+        case Some(Credentials(authProviderId, _)) ~ enrollments =>
+          val userRoles = enrollments.enrolments.map(_.key).mkString("[", ",", "]")
+          Logger(getClass).info(s"User \$authProviderId has been authorized with \$userRoles")
+          body(authProviderId)
+
+        case None ~ enrollments =>
+          Future.successful(Forbidden)
+      }
+      .recover(handleStrideFailure)
+  }
+
+  def handleStrideFailure(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+
+    case _: AuthorisationException ⇒
+      val continueUrl = CallOps.localFriendlyUrl(env, config)(request.uri, request.host)
+      toStrideLogin(continueUrl)
+  }
 
 }

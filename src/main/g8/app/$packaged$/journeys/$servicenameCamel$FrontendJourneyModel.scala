@@ -15,45 +15,34 @@
  */
 
 package $package$.journeys
-import $package$.models.$servicenameCamel$FrontendModel
+
+import java.time.{LocalDate, ZoneId}
+
+import $package$.models._
 import uk.gov.hmrc.play.fsm.JourneyModel
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object $servicenameCamel$FrontendJourneyModel extends JourneyModel {
 
   sealed trait State
   sealed trait IsError
 
-  override val root: State = State.Questions()
+  override val root: State = State.Start
 
   object State {
 
     case object Start extends State
 
-    case class Questions(maybeFormData: Option[$servicenameCamel$FrontendModel] = None)
-        extends State
-
-    case class Confirmation(formData: $servicenameCamel$FrontendModel) extends State
-
-    case object SomeError extends State with IsError
   }
 
   object Transitions {
     import State._
 
-    val start = Transition {
+    def start(user: String) = Transition {
       case _ => goto(Start)
     }
-
-    def gotoQuestions(humanId: String) = Transition {
-      case Confirmation(formData) => goto(Questions(Some(formData)))
-      case _                      => goto(Questions())
-    }
-
-    def gotoConfirmation(humanId: String)(formData: $servicenameCamel$FrontendModel) =
-      Transition {
-        case Questions(_) =>
-          goto(Confirmation(formData))
-      }
   }
 
 }

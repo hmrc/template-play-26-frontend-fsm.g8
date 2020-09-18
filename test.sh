@@ -6,9 +6,9 @@ if [[ -f ./build.sbt ]] && [[ -d ./src/main/g8 ]]; then
     echo ${TEMPLATE}
     mkdir -p target/sandbox
     cd target/sandbox
-    sudo rm -r new-shiny-service-26-fsm
-    g8 file://../../../${TEMPLATE} --servicename="New Shiny Service 26 FSM" --serviceTargetPort="9999" --package="uk.gov.hmrc.newshinyservice26fsmfrontend" -o new-shiny-service-26-fsm "$@"
-    cd new-shiny-service-26-fsm
+    sudo rm -r new-shiny-service
+    g8 file://../../../${TEMPLATE} --servicename="New Shiny Service" --serviceTargetPort="9999" --serviceUrlPrefix="shiny-url-prefix" --package="uk.gov.hmrc.newshinyservice" -o new-shiny-service "$@"
+    cd new-shiny-service
     git init
 	git add .
 	git commit -m start

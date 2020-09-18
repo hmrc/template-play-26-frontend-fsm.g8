@@ -1,6 +1,6 @@
 # $servicename$ Frontend
 
-[ ![Download](https://api.bintray.com/packages/hmrc/releases/new-shiny-service-26-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/new-shiny-service-26-frontend/_latestVersion)
+Web application.
 
 ## Running the tests
 
@@ -12,12 +12,13 @@
 
 ## Running the app locally
 
-    sm --start AGENTS_STUBS -f
+    sm --start $servicenameSnake$_SUITE
+    sm --stop $servicenameSnake$_FRONTEND 
     sbt run
 
 It should then be listening on port $serviceTargetPort$
 
-    browse http://localhost:$serviceTargetPort$/$servicenameHyphen$
+    browse http://localhost:$serviceTargetPort$/$serviceUrlPrefixHyphen$
 
 ### License
 

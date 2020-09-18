@@ -1,124 +1,58 @@
 package $package$.controllers
 
-import play.api.Application
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, InsufficientEnrolments}
-import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
+import play.api.test.Helpers._
+import play.api.{Application, Configuration, Environment}
+import uk.gov.hmrc.auth.core.AuthConnector
 import $package$.support.AppISpec
+import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 
 import scala.concurrent.Future
 
-class AuthActionsISpec extends AuthActionsISpecSetup {
+class AuthActionsISpec extends AuthActionISpecSetup {
 
-  "withAuthorisedAsAgent" should {
+  "withAuthorisedWithStrideGroup" should {
 
-    "call body with arn when valid agent" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-AS-AGENT", "identifiers": [
-           |    { "key":"AgentReferenceNumber", "value": "fooArn" }
-           |  ]}
-           |]}""".stripMargin
-      )
-      val result = TestController.withAuthorisedAsAgent
+    "call body with a valid authProviderId" in {
+
+      givenAuthorisedForStride("TBC", "StrideUserId")
+
+      val result = TestController.withAuthorisedWithStrideGroup("TBC")
+
       status(result) shouldBe 200
-      bodyOf(result) shouldBe "fooArn"
+      bodyOf(result) should include("StrideUserId")
     }
 
-    "throw AutorisationException when user not logged in" in {
-      givenUnauthorisedWith("MissingBearerToken")
-      an[AuthorisationException] shouldBe thrownBy {
-        TestController.withAuthorisedAsAgent
-      }
+    "redirect to log in page when user not enrolled for the service" in {
+      givenAuthorisedForStride("TBC", "StrideUserId")
+
+      val result = TestController.withAuthorisedWithStrideGroup("OTHER")
+      status(result) shouldBe 303
+      redirectLocation(result).get should include("/stride/sign-in")
     }
 
-    "throw InsufficientEnrolments when agent not enrolled for service" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-MTD-IT", "identifiers": [
-           |    { "key":"MTDITID", "value": "fooMtdItId" }
-           |  ]}
-           |]}""".stripMargin
-      )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withAuthorisedAsAgent
-      }
+    "redirect to log in page when user not authenticated" in {
+      givenRequestIsNotAuthorised("SessionRecordNotFound")
+
+      val result = TestController.withAuthorisedWithStrideGroup("TBC")
+      status(result) shouldBe 303
+      redirectLocation(result).get should include("/stride/sign-in")
     }
 
-    "throw InsufficientEnrolments when expected agent's identifier missing" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-AS-AGENT", "identifiers": [
-           |    { "key":"BAR", "value": "fooArn" }
-           |  ]}
-           |]}""".stripMargin
-      )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withAuthorisedAsAgent
-      }
-    }
-  }
+    "redirect to log in page when user authenticated with different provider" in {
+      givenRequestIsNotAuthorised("UnsupportedAuthProvider")
 
-  "withAuthorisedAsClient" should {
-
-    "call body with mtditid when valid mtd client" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-MTD-IT", "identifiers": [
-           |    { "key":"MTDITID", "value": "fooMtdItId" }
-           |  ]}
-           |]}""".stripMargin
-      )
-
-      val result = TestController.withAuthorisedAsClient
-      status(result) shouldBe 200
-      bodyOf(result) shouldBe "fooMtdItId"
-    }
-
-    "throw InsufficientEnrolments when client not enrolled for service" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-AS-AGENT", "identifiers": [
-           |    { "key":"AgentReferenceNumber", "value": "fooArn" }
-           |  ]}
-           |]}""".stripMargin
-      )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withAuthorisedAsClient
-      }
-    }
-
-    "throw InsufficientEnrolments when expected client's identifier missing" in {
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-MTD-IT", "identifiers": [
-           |    { "key":"BAR", "value": "fooMtdItId" }
-           |  ]}
-           |]}""".stripMargin
-      )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withAuthorisedAsClient
-      }
+      val result = TestController.withAuthorisedWithStrideGroup("TBC")
+      status(result) shouldBe 303
+      redirectLocation(result).get should include("/stride/sign-in")
     }
   }
 
 }
 
-trait AuthActionsISpecSetup extends AppISpec {
+trait AuthActionISpecSetup extends AppISpec {
 
   override def fakeApplication: Application = appBuilder.build()
 
@@ -126,20 +60,21 @@ trait AuthActionsISpecSetup extends AppISpec {
 
     override def authConnector: AuthConnector = app.injector.instanceOf[AuthConnector]
 
+    override def config: Configuration = app.injector.instanceOf[Configuration]
+
+    override def env: Environment = app.injector.instanceOf[Environment]
+
+    implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def withAuthorisedAsAgent[A]: Result =
-      await(super.withAuthorisedAsAgent { arn =>
-        Future.successful(Ok(arn.value))
+    def withAuthorisedWithStrideGroup[A](group: String): Result =
+      await(super.authorisedWithStrideGroup(group) { pid =>
+        Future.successful(Ok(pid))
       })
 
-    def withAuthorisedAsClient[A]: Result =
-      await(super.withAuthorisedAsClient { mtdItTd =>
-        Future.successful(Ok(mtdItTd.value))
-      })
-
+    override def toSubscriptionJourney(continueUrl: String): Result = Redirect("/subscription")
   }
 
 }

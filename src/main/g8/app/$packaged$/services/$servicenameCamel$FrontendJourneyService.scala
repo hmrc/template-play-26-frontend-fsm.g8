@@ -16,18 +16,15 @@
 
 package $package$.services
 
-import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Format
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.crypto.ApplicationCrypto
-import uk.gov.hmrc.http.HeaderCarrier
 import $package$.journeys.{$servicenameCamel$FrontendJourneyModel, $servicenameCamel$FrontendJourneyStateFormats}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.fsm.PersistentJourneyService
 
-@ImplementedBy(classOf[MongoDBCached$servicenameCamel$FrontendJourneyService])
-trait $servicenameCamel$FrontendJourneyService[RequestContext]
-    extends PersistentJourneyService[RequestContext] {
+trait $servicenameCamel$FrontendJourneyService[RequestContext] extends PersistentJourneyService[RequestContext] {
 
   val journeyKey = "$servicenameCamel$Journey"
 
@@ -45,8 +42,7 @@ trait $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
 case class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(
   cacheMongoRepository: CacheMongoRepository,
   applicationCrypto: ApplicationCrypto)
-    extends MongoDBCachedJourneyService[HeaderCarrier]
-    with $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier {
+    extends MongoDBCachedJourneyService[HeaderCarrier] with $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier {
 
   override val stateFormats: Format[model.State] =
     $servicenameCamel$FrontendJourneyStateFormats.formats

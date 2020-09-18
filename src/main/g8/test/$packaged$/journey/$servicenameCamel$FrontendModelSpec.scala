@@ -15,33 +15,37 @@
  */
 
 package $package$.journey
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions}
+
+import java.time.LocalDate
+
+import uk.gov.hmrc.domain.Nino
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State._
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.Transitions._
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.{State, Transition}
-import $package$.models.$servicenameCamel$FrontendModel
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.{State, Transition, TransitionNotAllowed}
+import $package$.models._
 import $package$.services.$servicenameCamel$FrontendJourneyService
 import $package$.support.{InMemoryStore, StateMatchers}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[State] {
+class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[State] with TestData {
 
   // dummy journey context
   case class DummyContext()
   implicit val dummyContext: DummyContext = DummyContext()
 
   "$servicenameCamel$FrontendModel" when {
-    "at state Questions" should {
-      "go to Confirmation when provided with a form data" in {
-        given(Questions()) when gotoConfirmation("001.H")(
-          $servicenameCamel$FrontendModel("Henry", None, None, None)) should thenGo(
-          Confirmation($servicenameCamel$FrontendModel("Henry", None, None, None)))
+
+    "at state Start" should {
+
+      "stay at Start when start" in {
+        given(Start) when start(eoriNumber) should thenGo(Start)
       }
     }
-  }
 
-  // TEST UTILITIES
+  }
 
   case class given(initialState: State)
       extends $servicenameCamel$FrontendJourneyService[DummyContext]
@@ -49,7 +53,20 @@ class $servicenameCamel$FrontendModelSpec extends UnitSpec with StateMatchers[St
 
     await(save((initialState, Nil)))
 
+    def withBreadcrumbs(breadcrumbs: State*): this.type = {
+      val (state, _) = await(fetch).getOrElse((Start, Nil))
+      await(save((state, breadcrumbs.toList)))
+      this
+    }
+
     def when(transition: Transition): (State, List[State]) =
       await(super.apply(transition))
   }
+}
+
+trait TestData {
+
+  val eoriNumber = "foo"
+  val correlationId = "123"
+
 }

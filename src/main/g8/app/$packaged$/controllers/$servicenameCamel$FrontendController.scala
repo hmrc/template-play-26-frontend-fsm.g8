@@ -20,117 +20,105 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.HeaderCarrier
-import $package$.connectors.{FrontendAuthConnector, $servicenameCamel$Connector}
-import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State.{Confirmation, Questions, Start}
-import $package$.models.$servicenameCamel$FrontendModel
+import uk.gov.hmrc.domain.Nino
+import $package$.connectors.{FrontendAuthConnector, $servicenameCamel$ApiConnector}
+import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State._
+import $package$.models.$servicenameCamel$Model
 import $package$.services.$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
-import $package$.views.html.{main_template, _}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import $package$.wiring.AppConfig
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.fsm.{JourneyController, JourneyIdSupport}
-import uk.gov.hmrc.play.views.html.helpers.{ErrorSummary, FormWithCSRF, Input}
 
 import scala.concurrent.ExecutionContext
 import scala.util.Success
 
 @Singleton
 class $servicenameCamel$FrontendController @Inject()(
+  appConfig: AppConfig,
   override val messagesApi: MessagesApi,
-  $servicenameCamel$Connector: $servicenameCamel$Connector,
+  $servicenamecamel$ApiConnector: $servicenameCamel$ApiConnector,
   val authConnector: FrontendAuthConnector,
   val env: Environment,
-  input: Input,
-  form: FormWithCSRF,
-  errorSummary: ErrorSummary,
-  mainTemplate: main_template,
   override val journeyService: $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier,
-  controllerComponents: MessagesControllerComponents)(
-  implicit val configuration: Configuration,
-  ec: ExecutionContext)
+  controllerComponents: MessagesControllerComponents,
+  startView: $package$.views.html.StartView
+)(implicit val config: Configuration, ec: ExecutionContext)
     extends FrontendController(controllerComponents) with I18nSupport with AuthActions
     with JourneyController[HeaderCarrier] with JourneyIdSupport[HeaderCarrier] {
 
   import $servicenameCamel$FrontendController._
   import $package$.journeys.$servicenameCamel$FrontendJourneyModel._
 
-  val AsHuman: WithAuthorised[String] = { implicit request =>
-    withAuthorisedAsHuman(_)
+  val AsStrideUser: WithAuthorised[String] = { implicit request =>
+    authorisedWithStrideGroup(appConfig.authorisedStrideGroup)
   }
+
+  val AsEnrolledUser: WithAuthorised[String] = { implicit request =>
+    authorisedWithEnrolment(appConfig.authorisedServiceName, appConfig.authorisedIdentifierKey)
+  }
+
+  def toSubscriptionJourney(continueUrl: String): Result =
+    Redirect(
+      appConfig.subscriptionJourneyUrl,
+      Map(
+        "continue" -> Seq(continueUrl)
+      ))
 
   // GET /
-  val showStart = action { implicit request =>
-    apply(Transitions.start, display).andThen {
-      case Success(_) =>
-        journeyService.cleanBreadcrumbs()
+  val showStart: Action[AnyContent] =
+    action { implicit request =>
+      whenAuthorised(AsEnrolledUser)(Transitions.start)(display)
+        .andThen {
+          // reset navigation history
+          case Success(_) => journeyService.cleanBreadcrumbs()
+        }
     }
-  }
 
-  // GET /questions
-  val showQuestions = action { implicit request =>
-    whenAuthorised(AsHuman)(Transitions.gotoQuestions)(display)
-  }
-
-  // POST /questions
-  val submitQuestions = action { implicit request =>
-    whenAuthorisedWithForm(AsHuman)($servicenameCamel$FrontendForm)(Transitions.gotoConfirmation)
-  }
-
-  // GET /confirmation
-  val showConfirmation = action { implicit request =>
-    showStateWhenAuthorised(AsHuman) {
-      case _: Confirmation =>
-    }
-  }
-
+  /**
+    * Function from the `State` to the `Call` (route),
+    * used by play-fsm internally to create redirects.
+    */
   override def getCallFor(state: State)(implicit request: Request[_]): Call = state match {
-    case Start           => routes.$servicenameCamel$FrontendController.showStart()
-    case _: Questions    => routes.$servicenameCamel$FrontendController.showQuestions()
-    case _: Confirmation => routes.$servicenameCamel$FrontendController.showConfirmation()
+    case Start =>
+      routes.$servicenameCamel$FrontendController.showStart()
   }
 
   import uk.gov.hmrc.play.fsm.OptionalFormOps._
 
-  val startPage = new start(mainTemplate)
-  val questionsPage = new questions(mainTemplate, input, form, errorSummary)
-  val confirmationPage = new confirmation(mainTemplate)
-
+  /**
+    * Function from the `State` to the `Result`,
+    * used by play-fsm internally to render the actual content.
+    */
   override def renderState(state: State, breadcrumbs: List[State], formWithErrors: Option[Form[_]])(
     implicit request: Request[_]): Result = state match {
 
     case Start =>
-      Ok(startPage(routes.$servicenameCamel$FrontendController.showQuestions()))
+      Ok(startView())
 
-    case Questions(maybeFormData) =>
-      val form: Form[$servicenameCamel$FrontendModel] = formWithErrors
-        .or(
-          maybeFormData
-            .map(formData => $servicenameCamel$FrontendForm.fill(formData))
-            .getOrElse($servicenameCamel$FrontendForm))
-      Ok(questionsPage(form, routes.$servicenameCamel$FrontendController.submitQuestions()))
-
-    case Confirmation(formData) =>
-      Ok(confirmationPage(formData, getCallFor(Questions(Some(formData))), getCallFor(Start)))
   }
 
   override implicit def context(implicit rh: RequestHeader): HeaderCarrier =
     appendJourneyId(super.hc)
 
-  override def amendContext(
-    headerCarrier: HeaderCarrier)(key: String, value: String): HeaderCarrier =
+  override def amendContext(headerCarrier: HeaderCarrier)(key: String, value: String): HeaderCarrier =
     headerCarrier.withExtraHeaders(key -> value)
 }
 
 object $servicenameCamel$FrontendController {
 
-  import $package$.controllers.FieldMappings._
+  import FormFieldMappings._
 
-  val $servicenameCamel$FrontendForm = Form[$servicenameCamel$FrontendModel](
+  val $servicenameCamel$Form = Form[$servicenameCamel$Model](
     mapping(
-      "name"            -> validName,
-      "postcode"        -> optional(postcode),
-      "telephoneNumber" -> telephoneNumber,
-      "emailAddress"    -> emailAddress)($servicenameCamel$FrontendModel.apply)(
-      $servicenameCamel$FrontendModel.unapply))
+      "nino" -> uppercaseNormalizedText
+        .verifying(validNino())
+        .transform(Nino.apply, (n: Nino) => n.toString),
+      "givenName"   -> trimmedName.verifying(validName("givenName", 1)),
+      "familyName"  -> trimmedName.verifying(validName("familyName", 2)),
+      "dateOfBirth" -> dateOfBirthMapping
+    )($servicenameCamel$Model.apply)($servicenameCamel$Model.unapply))
 }

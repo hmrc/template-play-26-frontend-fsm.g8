@@ -2,61 +2,49 @@ package $package$.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import $package$.support.WireMockSupport
-import play.api.test.FakeRequest
-import uk.gov.hmrc.http.SessionKeys
 
 trait AuthStubs {
   me: WireMockSupport =>
 
-  case class Enrolment(serviceName: String, identifierName: String, identifierValue: String)
-
-  def authorisedAsValidAgent[A](request: FakeRequest[A], arn: String) =
-    authenticated(request, Enrolment("HMRC-AS-AGENT", "AgentReferenceNumber", arn), isAgent = true)
-
-  def authenticated[A](
-    request: FakeRequest[A],
-    enrolment: Enrolment,
-    isAgent: Boolean): FakeRequest[A] = {
-    givenAuthorisedFor(
-      s"""
-         |{
-         |  "authorise": [
-         |    { "identifiers":[], "state":"Activated", "enrolment": "\${enrolment.serviceName}" },
-         |    { "authProviders": ["GovernmentGateway"] }
-         |  ],
-         |  "retrieve":["authorisedEnrolments"]
-         |}
-           """.stripMargin,
-      s"""
-         |{
-         |"authorisedEnrolments": [
-         |  { "key":"\${enrolment.serviceName}", "identifiers": [
-         |    {"key":"\${enrolment.identifierName}", "value": "\${enrolment.identifierValue}"}
-         |  ]}
-         |]}
-          """.stripMargin
-    )
-    request.withSession(SessionKeys.authToken -> "Bearer XYZ")
-  }
-
-  def givenUnauthorisedWith(mdtpDetail: String): Unit =
+  def givenRequestIsNotAuthorised(mdtpDetail: String): AuthStubs = {
     stubFor(
       post(urlEqualTo("/auth/authorise"))
         .willReturn(
           aResponse()
             .withStatus(401)
             .withHeader("WWW-Authenticate", s"""MDTP detail="\$mdtpDetail"""")))
+    this
+  }
 
-  def givenAuthorisedFor(payload: String, responseBody: String): Unit = {
+  case class Enrolment(serviceName: String, identifierName: String, identifierValue: String)
+
+  def givenAuthorisedForEnrolment[A](enrolment: Enrolment): AuthStubs = {
     stubFor(
       post(urlEqualTo("/auth/authorise"))
         .atPriority(1)
-        .withRequestBody(equalToJson(payload, true, true))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody(responseBody)))
+        .withRequestBody(equalToJson(
+          s"""
+             |{
+             |  "authorise": [
+             |    { "identifiers":[], "state":"Activated", "enrolment": "\${enrolment.serviceName}" },
+             |    { "authProviders": ["GovernmentGateway"] }
+             |  ],
+             |  "retrieve":["authorisedEnrolments"]
+             |}
+           """.stripMargin,
+          true,
+          true
+        ))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(s"""
+                       |{
+                       |"authorisedEnrolments": [
+                       |  { "key":"\${enrolment.serviceName}", "identifiers": [
+                       |    {"key":"\${enrolment.identifierName}", "value": "\${enrolment.identifierValue}"}
+                       |  ]}
+                       |]}
+          """.stripMargin)))
 
     stubFor(
       post(urlEqualTo("/auth/authorise"))
@@ -64,6 +52,55 @@ trait AuthStubs {
         .willReturn(aResponse()
           .withStatus(401)
           .withHeader("WWW-Authenticate", "MDTP detail=\\"InsufficientEnrolments\\"")))
+    this
+  }
+
+  def givenAuthorisedForStride(strideGroup: String, strideUserId: String): AuthStubs = {
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .atPriority(1)
+        .withRequestBody(equalToJson(
+          s"""
+             |{
+             |  "authorise": [
+             |    {
+             |      "identifiers": [],
+             |      "state": "Activated",
+             |      "enrolment": "\$strideGroup"
+             |    },
+             |    {
+             |      "authProviders": [
+             |        "PrivilegedApplication"
+             |      ]
+             |    }
+             |  ],
+             |  "retrieve": ["optionalCredentials","allEnrolments"]
+             |}
+           """.stripMargin,
+          true,
+          true
+        ))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(s"""
+                       |{
+                       |  "optionalCredentials":{
+                       |    "providerId": "\$strideUserId",
+                       |    "providerType": "PrivilegedApplication"
+                       |  },
+                       |  "allEnrolments":[
+                       |    {"key":"\$strideGroup"}
+                       |  ]
+                       |}
+       """.stripMargin)))
+
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .atPriority(2)
+        .willReturn(aResponse()
+          .withStatus(401)
+          .withHeader("WWW-Authenticate", "MDTP detail=\\"InsufficientEnrolments\\"")))
+    this
   }
 
   def verifyAuthoriseAttempt(): Unit =

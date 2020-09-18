@@ -1,99 +1,133 @@
 package $package$.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import java.time.{LocalDate, ZoneId}
+
 import play.api.Application
-import play.api.http.Status
-import play.api.libs.json.Json
-import uk.gov.hmrc.http._
-import $package$.models.$servicenameCamel$FrontendModel
+import uk.gov.hmrc.domain.Nino
+import $package$.models._
+import $package$.stubs.$servicenameCamel$Stubs
 import $package$.support.AppISpec
+import uk.gov.hmrc.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class $servicenameCamel$ConnectorISpec extends $servicenameCamel$ConnectorISpecSetup {
 
-  "$servicenameCamel$Connector" when {
+  "$servicenameCamel$ApiConnector" when {
 
-    "getSmth" should {
+    "someApi" should {
 
-      "return 200" in {
-        stubFor(
-          get(urlEqualTo(s"/$servicenameHyphen$/dosmth"))
-            .willReturn(aResponse()
-              .withStatus(Status.OK)
-              .withBody(Json.obj("foo" -> "bar").toString())))
+      "return status when range provided" in {
+        givenSomeApiRequestSucceeds()
 
-        val response: HttpResponse = await(connector.getSmth())
-        response.status shouldBe 200
-        verifyTimerExistsAndBeenUpdated("ConsumedAPI-$servicenameHyphen$-smth-GET")
+        val result: $servicenameCamel$ApiResponse =
+          await(connector.someApi(request))
+
+        result.result shouldBe defined
+        result.error shouldBe None
       }
 
-      "throw an exception if no connection was possible" in {
-        stopWireMockServer()
-        intercept[BadGatewayException] {
-          await(connector.getSmth())
+      "return status when no range provided" in {
+        givenSomeApiRequestSucceeds()
+
+        val result: $servicenameCamel$ApiResponse =
+          await(connector.someApi(request))
+
+        result.result shouldBe defined
+        result.error shouldBe None
+      }
+
+      "return check error when 400 response ERR_REQUEST_INVALID" in {
+        givenSomeApiErrorWhenMissingInputField()
+
+        val result: $servicenameCamel$ApiResponse =
+          await(connector.someApi(request))
+
+        result.result shouldBe None
+        result.error shouldBe defined
+        result.error.get.errCode shouldBe "ERR_REQUEST_INVALID"
+      }
+
+      "return check error when 404 response ERR_NOT_FOUND" in {
+        givenSomeApiErrorWhenStatusNotFound()
+
+        val result: $servicenameCamel$ApiResponse =
+          await(connector.someApi(request))
+
+        result.result shouldBe None
+        result.error shouldBe defined
+        result.error.get.errCode shouldBe "ERR_NOT_FOUND"
+      }
+
+      "return check error when 400 response ERR_VALIDATION" in {
+        givenSomeApiErrorWhenDOBInvalid()
+
+        val result: $servicenameCamel$ApiResponse =
+          await(connector.someApi(request))
+
+        result.result shouldBe None
+        result.error shouldBe defined
+        result.error.get.errCode shouldBe "ERR_VALIDATION"
+      }
+
+      "throw exception if other 4xx response" in {
+        givenSomeApiStub(429, validRequestOfSomeApi(), "")
+
+        an[$servicenameCamel$ProxyError] shouldBe thrownBy {
+          await(connector.someApi(request))
         }
-        startWireMockServer()
       }
 
-      "throw an exception if the response is 400" in {
-        stubFor(
-          get(urlEqualTo(s"/$servicenameHyphen$/dosmth"))
-            .willReturn(aResponse()
-              .withStatus(Status.BAD_REQUEST)))
+      "throw exception if 5xx response" in {
+        givenSomeApiStub(500, validRequestOfSomeApi(), "")
 
-        intercept[BadRequestException] {
-          await(connector.getSmth())
-        }
-      }
-    }
-
-    "postSmth" should {
-
-      "return 201" in {
-        stubFor(
-          post(urlEqualTo(s"/$servicenameHyphen$/dosmth"))
-            .willReturn(aResponse()
-              .withStatus(Status.CREATED)))
-
-        val response: HttpResponse = await(connector.postSmth(model))
-        response.status shouldBe 201
-        verifyTimerExistsAndBeenUpdated("ConsumedAPI-$servicenameHyphen$-smth-POST")
-      }
-
-      "throw an exception if no connection was possible" in {
-        stopWireMockServer()
-        intercept[BadGatewayException] {
-          await(connector.postSmth(model))
-        }
-        startWireMockServer()
-      }
-
-      "throw an exception if the response is 400" in {
-        stubFor(
-          post(urlEqualTo(s"/$servicenameHyphen$/dosmth"))
-            .willReturn(aResponse()
-              .withStatus(Status.BAD_REQUEST)))
-
-        intercept[BadRequestException] {
-          await(connector.postSmth(model))
+        an[$servicenameCamel$ProxyError] shouldBe thrownBy {
+          await(connector.someApi(request))
         }
       }
     }
   }
 
+  val errorGenerator: HttpErrorFunctions = new HttpErrorFunctions {}
+
+  "extractResponseBody" should {
+    "return the json notFoundMessage if the prefix present" in {
+      val responseBody = """{"bar":"foo"}"""
+      val errorMessage = errorGenerator.notFoundMessage("GET", "/test/foo/bar", responseBody)
+      $servicenameCamel$ApiConnector
+        .extractResponseBody(errorMessage, "Response body: '") shouldBe responseBody
+    }
+
+    "return the json badRequestMessage if the prefix present" in {
+      val responseBody = """{"bar":"foo"}"""
+      val errorMessage = errorGenerator.badRequestMessage("GET", "/test/foo/bar", responseBody)
+      $servicenameCamel$ApiConnector
+        .extractResponseBody(errorMessage, "Response body '") shouldBe responseBody
+    }
+
+    "return the whole message if prefix missing" in {
+      val responseBody = """{"bar":"foo"}"""
+      val errorMessage = errorGenerator.notFoundMessage("GET", "/test/foo/bar", responseBody)
+      $servicenameCamel$ApiConnector
+        .extractResponseBody(errorMessage, "::: '") shouldBe s"""{"error":{"errCode":"\$errorMessage"}}"""
+    }
+  }
+
 }
 
-trait $servicenameCamel$ConnectorISpecSetup extends AppISpec {
+trait $servicenameCamel$ConnectorISpecSetup extends AppISpec with $servicenameCamel$Stubs {
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override def fakeApplication: Application = appBuilder.build()
 
-  lazy val connector: $servicenameCamel$Connector =
-    app.injector.instanceOf[$servicenameCamel$Connector]
+  lazy val connector: $servicenameCamel$ApiConnector =
+    app.injector.instanceOf[$servicenameCamel$ApiConnector]
 
-  val model = $servicenameCamel$FrontendModel(
-    "Dave Agent",
-    Some("AA1 1AA"),
-    Some("0123456789"),
-    Some("email@test.com"))
+  val request = $servicenameCamel$ApiRequest(
+    Nino("RJ301829A"),
+    "Doe",
+    "Jane",
+    "2001-01-31"
+  )
 }

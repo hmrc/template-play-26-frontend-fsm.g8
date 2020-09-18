@@ -15,6 +15,7 @@
  */
 
 package $package$.journeys
+
 import play.api.libs.json._
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State
 import $package$.journeys.$servicenameCamel$FrontendJourneyModel.State._
@@ -22,20 +23,13 @@ import uk.gov.hmrc.play.fsm.JsonStateFormats
 
 object $servicenameCamel$FrontendJourneyStateFormats extends JsonStateFormats[State] {
 
-  val questionsFormat = Json.format[Questions]
-  val confirmationFormat = Json.format[Confirmation]
-
   override val serializeStateProperties: PartialFunction[State, JsValue] = {
-    case s: Questions    => questionsFormat.writes(s)
-    case s: Confirmation => confirmationFormat.writes(s)
+    case _ => JsNull
   }
 
   override def deserializeState(stateName: String, properties: JsValue): JsResult[State] =
     stateName match {
-      case "Start"        => JsSuccess(Start)
-      case "Questions"    => questionsFormat.reads(properties)
-      case "Confirmation" => confirmationFormat.reads(properties)
-      case "SomeError"    => JsSuccess(SomeError)
-      case _              => JsError(s"Unknown state name \$stateName")
+      case "Start" => JsSuccess(Start)
+      case _       => JsError(s"Unknown state name \$stateName")
     }
 }

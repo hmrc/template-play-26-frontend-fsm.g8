@@ -53,9 +53,5 @@ trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
 
   protected def stopWireMockServer() = wireMockServer.stop()
 
-  protected def startWireMockServer() = {
-    WireMock.configureFor(wireMockHost, wireMockPort)
-    wireMockServer.start()
-    commonStubs()
-  }
+  protected def startWireMockServer() = wireMockServer.start()
 }
