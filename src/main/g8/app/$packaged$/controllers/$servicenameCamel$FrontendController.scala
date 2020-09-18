@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext
 import scala.util.Success
 
 @Singleton
-class $servicenameCamel$FrontendController @Inject()(
+class $servicenameCamel$FrontendController @Inject() (
   appConfig: AppConfig,
   override val messagesApi: MessagesApi,
   $servicenamecamel$ApiConnector: $servicenameCamel$ApiConnector,
@@ -66,7 +66,8 @@ class $servicenameCamel$FrontendController @Inject()(
       appConfig.subscriptionJourneyUrl,
       Map(
         "continue" -> Seq(continueUrl)
-      ))
+      )
+    )
 
   // GET /
   val showStart: Action[AnyContent] =
@@ -93,8 +94,9 @@ class $servicenameCamel$FrontendController @Inject()(
     * Function from the `State` to the `Result`,
     * used by play-fsm internally to render the actual content.
     */
-  override def renderState(state: State, breadcrumbs: List[State], formWithErrors: Option[Form[_]])(
-    implicit request: Request[_]): Result = state match {
+  override def renderState(state: State, breadcrumbs: List[State], formWithErrors: Option[Form[_]])(implicit
+    request: Request[_]
+  ): Result = state match {
 
     case Start =>
       Ok(startView())
@@ -120,5 +122,6 @@ object $servicenameCamel$FrontendController {
       "givenName"   -> trimmedName.verifying(validName("givenName", 1)),
       "familyName"  -> trimmedName.verifying(validName("familyName", 2)),
       "dateOfBirth" -> dateOfBirthMapping
-    )($servicenameCamel$Model.apply)($servicenameCamel$Model.unapply))
+    )($servicenameCamel$Model.apply)($servicenameCamel$Model.unapply)
+  )
 }
