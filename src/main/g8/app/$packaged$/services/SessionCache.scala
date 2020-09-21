@@ -51,10 +51,11 @@ trait SessionCache[T, C] {
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 
-  private def get(
-    implicit reads: Reads[T],
+  private def get(implicit
+    reads: Reads[T],
     requestContext: C,
-    ec: ExecutionContext): Future[Either[String, Option[T]]] =
+    ec: ExecutionContext
+  ): Future[Either[String, Option[T]]] =
     getSessionId match {
       case Some(sessionId) ⇒
         cacheRepository
@@ -74,9 +75,8 @@ trait SessionCache[T, C] {
               }
             case None => Right(None)
           }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
+          .recover { case e ⇒
+            Left(e.getMessage)
           }
 
       case None ⇒
@@ -85,7 +85,8 @@ trait SessionCache[T, C] {
     }
 
   private def store(
-    newSession: T)(implicit writes: Writes[T], requestContext: C, ec: ExecutionContext): Future[Either[String, Unit]] =
+    newSession: T
+  )(implicit writes: Writes[T], requestContext: C, ec: ExecutionContext): Future[Either[String, Unit]] =
     getSessionId match {
       case Some(sessionId) ⇒
         cacheRepository
@@ -97,9 +98,8 @@ trait SessionCache[T, C] {
               Right(())
             }
           }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
+          .recover { case e ⇒
+            Left(e.getMessage)
           }
 
       case None ⇒
@@ -118,9 +118,8 @@ trait SessionCache[T, C] {
               Right(())
             }
           }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
+          .recover { case e ⇒
+            Left(e.getMessage)
           }
 
       case None ⇒

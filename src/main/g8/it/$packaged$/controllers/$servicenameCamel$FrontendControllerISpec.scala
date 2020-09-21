@@ -24,7 +24,7 @@ class $servicenameCamel$FrontendControllerISpec
     "GET /" should {
 
       "redirect to the start page" in {
-        givenAuthorisedForEnrolment(Enrolment("HMRC-XYZ", "EORINumber","foo"))
+        givenAuthorisedForEnrolment(Enrolment("HMRC-XYZ", "EORINumber", "foo"))
         val result = controller.showStart(fakeRequest)
         status(result) shouldBe 200
         journey.get shouldBe Some((Start, Nil))
@@ -52,7 +52,8 @@ trait $servicenameCamel$FrontendControllerISpecSetup extends AppISpec {
     appBuilder
       .overrides(
         bind(classOf[$servicenameCamel$FrontendJourneyServiceWithHeaderCarrier])
-          .to(classOf[TestInMemory$servicenameCamel$FrontendJourneyService]))
+          .to(classOf[TestInMemory$servicenameCamel$FrontendJourneyService])
+      )
       .build()
 
   lazy val controller: $servicenameCamel$FrontendController =

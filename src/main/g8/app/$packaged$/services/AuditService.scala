@@ -33,23 +33,22 @@ object $servicenameCamel$FrontendEvent extends Enumeration {
 }
 
 @Singleton
-class AuditService @Inject()(val auditConnector: AuditConnector) {
+class AuditService @Inject() (val auditConnector: AuditConnector) {
 
   import $servicenameCamel$FrontendEvent._
 
   private[services] def auditEvent(
     event: $servicenameCamel$FrontendEvent,
     transactionName: String,
-    details: Seq[(String, Any)] = Seq.empty)(
-    implicit hc: HeaderCarrier,
-    request: Request[Any],
-    ec: ExecutionContext): Future[Unit] =
+    details: Seq[(String, Any)] = Seq.empty
+  )(implicit hc: HeaderCarrier, request: Request[Any], ec: ExecutionContext): Future[Unit] =
     send(createEvent(event, transactionName, details: _*))
 
   private[services] def createEvent(
     event: $servicenameCamel$FrontendEvent,
     transactionName: String,
-    details: (String, Any)*)(implicit hc: HeaderCarrier, request: Request[Any], ec: ExecutionContext): DataEvent = {
+    details: (String, Any)*
+  )(implicit hc: HeaderCarrier, request: Request[Any], ec: ExecutionContext): DataEvent = {
 
     val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString): _*)
     val tags = hc.toAuditTags(transactionName, request.path)

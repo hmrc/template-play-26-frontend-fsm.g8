@@ -39,10 +39,10 @@ trait $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier
     extends $servicenameCamel$FrontendJourneyService[HeaderCarrier]
 
 @Singleton
-case class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject()(
+case class MongoDBCached$servicenameCamel$FrontendJourneyService @Inject() (
   cacheMongoRepository: CacheMongoRepository,
-  applicationCrypto: ApplicationCrypto)
-    extends MongoDBCachedJourneyService[HeaderCarrier] with $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier {
+  applicationCrypto: ApplicationCrypto
+) extends MongoDBCachedJourneyService[HeaderCarrier] with $servicenameCamel$FrontendJourneyServiceWithHeaderCarrier {
 
   override val stateFormats: Format[model.State] =
     $servicenameCamel$FrontendJourneyStateFormats.formats

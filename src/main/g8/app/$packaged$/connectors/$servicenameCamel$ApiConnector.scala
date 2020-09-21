@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class $servicenameCamel$ApiConnector @Inject()(appConfig: AppConfig, http: HttpGet with HttpPost, metrics: Metrics)
+class $servicenameCamel$ApiConnector @Inject() (appConfig: AppConfig, http: HttpGet with HttpPost, metrics: Metrics)
     extends HttpAPIMonitor {
 
   val HEADER_X_CORRELATION_ID = "X-Correlation-Id"
@@ -42,14 +42,15 @@ class $servicenameCamel$ApiConnector @Inject()(appConfig: AppConfig, http: HttpG
 
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  def someApi(request: $servicenameCamel$ApiRequest)(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[$servicenameCamel$ApiResponse] =
+  def someApi(
+    request: $servicenameCamel$ApiRequest
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[$servicenameCamel$ApiResponse] =
     monitor(s"ConsumedAPI-$servicenameHyphen$-some-api-POST") {
       http
         .POST[$servicenameCamel$ApiRequest, $servicenameCamel$ApiResponse](
           new URL(baseUrl + someApiPath).toExternalForm,
-          request)(
+          request
+        )(
           implicitly[Writes[$servicenameCamel$ApiRequest]],
           implicitly[HttpReads[$servicenameCamel$ApiResponse]],
           hc.withExtraHeaders(HEADER_X_CORRELATION_ID -> UUID.randomUUID().toString),
@@ -63,8 +64,8 @@ class $servicenameCamel$ApiConnector @Inject()(appConfig: AppConfig, http: HttpG
           case UpstreamErrorResponse.Upstream4xxResponse(e) if e.statusCode == 409 =>
             Json.parse(extractResponseBody(e.message, "Response body: '")).as[$servicenameCamel$ApiResponse]
         }
-        .recoverWith {
-          case e: Throwable => Future.failed($servicenameCamel$ProxyError(e))
+        .recoverWith { case e: Throwable =>
+          Future.failed($servicenameCamel$ProxyError(e))
         }
     }
 
